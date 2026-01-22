@@ -9,76 +9,84 @@
             font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
         }
 
-        /* 1. 하얀 배경: 상하여백 확대, 좌우여백 최소화 */
+        /* [해결 1] 좌우 여백을 0으로 만들어 박스를 타이머에 딱 맞게 강제 압축 */
         .card { 
             background: white; 
             border-radius: 24px; 
-            padding: 30px 0px; /* 상하 45px, 좌우 15px */
+            /* 좌우 0px로 설정하여 불필요한 넓이 제거 */
+            padding: 50px 0px; 
             box-shadow: 0 10px 40px rgba(0,0,0,0.06); 
             text-align: center; 
-            width: fit-content; 
+            width: fit-content;
             margin: 0 auto;
+            /* 내부 요소들이 밖으로 나가지 않게 함 */
+            display: inline-block;
         }
         
         .title-input {
-            border: none; background: transparent; font-size: 22px; font-weight: 800; text-align: center;
-            width: 100%; margin-bottom: 15px; outline: none; color: #37352f;
+            border: none; background: transparent; font-size: 20px; font-weight: 800; text-align: center;
+            width: 100%; margin-bottom: 12px; outline: none; color: #37352f;
         }
 
-        /* 설정 캡슐 디자인 */
         .integrated-settings {
-            background: #f4f4f4; border-radius: 12px; padding: 6px 12px;
-            margin-bottom: 30px; display: inline-flex; align-items: center; gap: 10px;
+            background: #f4f4f4; border-radius: 10px; padding: 5px 10px;
+            margin-bottom: 25px; display: inline-flex; align-items: center; gap: 8px;
         }
         
         input[type="datetime-local"] { 
-            border: none; background: transparent; font-size: 13px; outline: none; 
+            border: none; background: transparent; font-size: 12px; outline: none; 
             font-weight: 600; cursor: pointer; color: #37352f !important;
         }
 
-        /* 2. 컬러피커: 동그라미 디자인 (강제 고정) */
+        /* [해결 2] 컬러피커 찌그러짐 방지 - 크기 강제 고정 */
         .color-wrapper {
-            display: flex; align-items: center; border-left: 1px solid #ddd; padding-left: 10px;
+            display: flex; align-items: center; border-left: 1px solid #ddd; padding-left: 8px;
         }
+        
         input[type="color"] {
-            width: 24px; height: 24px; border: none; cursor: pointer; 
+            /* 가로세로 비율 강제 고정 */
+            width: 20px !important; 
+            height: 20px !important; 
+            border: none; cursor: pointer; 
             background: none; border-radius: 50%; -webkit-appearance: none;
+            padding: 0;
+            /* 절대 찌그러지지 않게 설정 */
+            flex-shrink: 0; 
         }
+        
         input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
         input[type="color"]::-webkit-color-swatch { border: none; border-radius: 50%; }
 
-        /* 3. 타이머 칸: 정사각형 디자인 복구 */
+        /* 타이머 영역 */
         .timer-container { 
             display: flex; 
             justify-content: center; 
-            gap: 10px; /* 박스 사이 간격 */
+            gap: 8px; 
+            /* 박스 양옆에 약간의 숨통만 틔워줌 */
+            padding: 0 15px; 
         }
+        
         .time-box { 
-            color: white; border-radius: 16px; 
-            width: 70px; height: 70px; /* 정사각형 크기 */
+            color: white; border-radius: 14px; 
+            width: 65px; height: 65px; 
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            flex-shrink: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            flex-shrink: 0;
         }
 
-        .number { font-size: 26px; font-weight: 700; display: block; line-height: 1; margin-bottom: 4px; }
-        .label { font-size: 8px; text-transform: uppercase; opacity: 0.8; font-weight: 700; letter-spacing: 0.5px; }
-
-        @keyframes slideDown { 0% { transform: translateY(-3px); } 100% { transform: translateY(0); } }
-        .animate { animation: slideDown 0.15s ease-out; }
+        .number { font-size: 24px; font-weight: 700; display: block; line-height: 1; margin-bottom: 4px; }
+        .label { font-size: 8px; text-transform: uppercase; opacity: 0.8; font-weight: 700; }
     </style>
 </head>
 <body>
 
     <div class="card">
         <input type="text" id="projectTitle" class="title-input" placeholder="Untitled">
-        
         <div class="integrated-settings">
             <input type="datetime-local" id="targetDate">
             <div class="color-wrapper">
                 <input type="color" id="colorPicker" value="#222222">
             </div>
         </div>
-
         <div class="timer-container">
             <div class="time-box"><span class="number" id="days">00</span><span class="label">Days</span></div>
             <div class="time-box"><span class="number" id="hours">00</span><span class="label">Hours</span></div>
@@ -97,10 +105,13 @@
         }
 
         const KEY_TITLE = `title_${widgetId}`, KEY_DATE = `date_${widgetId}`, KEY_COLOR = `color_${widgetId}`;
-        const titleInput = document.getElementById('projectTitle'), dateInput = document.getElementById('targetDate'), colorPicker = document.getElementById('colorPicker');
+        const titleInput = document.getElementById('projectTitle'), 
+              dateInput = document.getElementById('targetDate'), 
+              colorPicker = document.getElementById('colorPicker');
 
         if (localStorage.getItem(KEY_TITLE)) titleInput.value = localStorage.getItem(KEY_TITLE);
         if (localStorage.getItem(KEY_DATE)) dateInput.value = localStorage.getItem(KEY_DATE);
+        
         const savedColor = localStorage.getItem(KEY_COLOR) || "#222222";
         colorPicker.value = savedColor;
         applyColor(savedColor);
@@ -127,17 +138,10 @@
                 return;
             }
             const d = Math.floor(diff / 86400000), h = Math.floor((diff / 3600000) % 24), m = Math.floor((diff / 60000) % 60), s = Math.floor((diff / 1000) % 60);
-            updateElement("days", d); updateElement("hours", h); updateElement("minutes", m); updateElement("seconds", s);
-        }
-
-        function updateElement(id, value) {
-            const el = document.getElementById(id);
-            const newVal = String(value).padStart(2, '0');
-            if (el.innerText !== newVal) {
-                el.innerText = newVal;
-                el.classList.add("animate");
-                setTimeout(() => el.classList.remove("animate"), 150);
-            }
+            document.getElementById("days").innerText = String(d).padStart(2, '0');
+            document.getElementById("hours").innerText = String(h).padStart(2, '0');
+            document.getElementById("minutes").innerText = String(m).padStart(2, '0');
+            document.getElementById("seconds").innerText = String(s).padStart(2, '0');
         }
         setInterval(updateTimer, 1000); updateTimer();
     </script>
