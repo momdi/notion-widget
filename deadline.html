@@ -5,112 +5,32 @@
         body { background: transparent; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: -apple-system, sans-serif; }
         .card { background: white; border-radius: 20px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; width: fit-content; }
         
-        /* 설정 영역: 날짜와 색상 선택 */
-        .settings-group { margin-bottom: 20px; display: flex; gap: 10px; justify-content: center; align-items: center; }
+        /* 설정 영역 */
+        .settings-group { margin-bottom: 20px; display: flex; gap: 12px; justify-content: center; align-items: center; }
         
+        /* 날짜 입력창 스타일 */
         input[type="datetime-local"] { 
-            border: none; background: #f4f4f4; border-radius: 8px; padding: 8px; font-size: 13px; outline: none; font-weight: 500;
+            border: none; background: #f4f4f4; border-radius: 8px; padding: 8px 12px; font-size: 13px; outline: none; font-weight: 600; color: #444;
+            font-family: inherit; cursor: pointer;
         }
 
-        /* 컬러 피커 스타일 */
+        /* 🎨 컬러 피커를 예쁜 동그라미로 만들기 */
+        .color-wrapper {
+            width: 28px; height: 28px; border-radius: 50%; overflow: hidden; border: 2px solid #eee;
+            display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s;
+        }
+        .color-wrapper:hover { transform: scale(1.1); }
+        
         input[type="color"] {
-            border: none; width: 30px; height: 30px; cursor: pointer; background: none; padding: 0;
+            border: none; width: 50px; height: 50px; cursor: pointer; background: none; padding: 0; transform: scale(2);
         }
         
+        /* 타이머 디자인 */
         .timer-container { display: flex; justify-content: center; gap: 10px; }
-        
         .time-box { 
-            background: #111; /* 기본값 */
-            color: white; border-radius: 12px; padding: 15px 12px; min-width: 55px; 
-            transition: background 0.3s ease; /* 색상 바뀔 때 부드럽게 */
+            background: #111; color: white; border-radius: 12px; padding: 15px 12px; min-width: 55px; 
+            transition: background 0.3s ease; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
 
         .number { font-size: 26px; font-weight: 800; display: block; line-height: 1; margin-bottom: 5px; }
-        .label { font-size: 9px; text-transform: uppercase; opacity: 0.8; font-weight: bold; }
-
-        @keyframes slideDown {
-            0% { transform: translateY(-5px); opacity: 0.7; }
-            100% { transform: translateY(0); opacity: 1; }
-        }
-        .animate { animation: slideDown 0.2s ease-out; }
-    </style>
-</head>
-<body>
-
-    <div class="card">
-        <div class="settings-group">
-            <input type="datetime-local" id="targetDate" onchange="saveData()">
-            <input type="color" id="colorPicker" value="#111111" onchange="saveData()">
-        </div>
-
-        <div class="timer-container">
-            <div class="time-box"><span class="number" id="days">00</span><span class="label">Days</span></div>
-            <div class="time-box"><span class="number" id="hours">00</span><span class="label">Hours</span></div>
-            <div class="time-box"><span class="number" id="minutes">00</span><span class="label">Min</span></div>
-            <div class="time-box"><span class="number" id="seconds">00</span><span class="label">Sec</span></div>
-        </div>
-    </div>
-
-    <script>
-        // 저장된 데이터 불러오기
-        const savedDate = localStorage.getItem('deadline');
-        const savedColor = localStorage.getItem('pointColor');
-
-        if (savedDate) document.getElementById('targetDate').value = savedDate;
-        if (savedColor) {
-            document.getElementById('colorPicker').value = savedColor;
-            applyColor(savedColor);
-        }
-
-        function saveData() {
-            const dateVal = document.getElementById('targetDate').value;
-            const colorVal = document.getElementById('colorPicker').value;
-            
-            localStorage.setItem('deadline', dateVal);
-            localStorage.setItem('pointColor', colorVal);
-            
-            applyColor(colorVal);
-        }
-
-        function applyColor(color) {
-            const boxes = document.querySelectorAll('.time-box');
-            boxes.forEach(box => box.style.backgroundColor = color);
-        }
-
-        function updateTimer() {
-            const target = document.getElementById('targetDate').value;
-            if (!target) return;
-
-            const diff = new Date(target) - new Date();
-            if (diff <= 0) {
-                ["days","hours","minutes","seconds"].forEach(id => document.getElementById(id).innerText = "00");
-                return;
-            }
-
-            const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-            const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
-            const m = Math.floor((diff / (1000 * 60)) % 60);
-            const s = Math.floor((diff / 1000) % 60);
-
-            updateElement("days", d);
-            updateElement("hours", h);
-            updateElement("minutes", m);
-            updateElement("seconds", s);
-        }
-
-        function updateElement(id, value) {
-            const el = document.getElementById(id);
-            const newVal = String(value).padStart(2, '0');
-            if (el.innerText !== newVal) {
-                el.innerText = newVal;
-                el.classList.remove("animate");
-                void el.offsetWidth;
-                el.classList.add("animate");
-            }
-        }
-
-        setInterval(updateTimer, 1000);
-        updateTimer();
-    </script>
-</body>
-</html>
+        .label { font-size: 9px; text-transform: uppercase; opacity: 0.8
