@@ -7,35 +7,39 @@
             height: 100vh; margin: 0; overflow: hidden;
             font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
         }
+        /* [슬림 디자인] 패딩과 간격을 최소화하여 좌우 여백 제거 */
         .card { 
-            background: white; border-radius: 24px; padding: 45px 15px; 
-            box-shadow: 0 10px 40px rgba(0,0,0,0.06); text-align: center; 
-            width: 310px; margin: 0 auto; display: flex; flex-direction: column; align-items: center;
+            background: white; border-radius: 16px; padding: 20px 10px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; 
+            width: fit-content; margin: 0 auto;
         }
         .title-input {
-            border: none; background: transparent; font-size: 20px; font-weight: 800; text-align: center;
-            width: 90%; margin-bottom: 12px; outline: none; color: #37352f;
+            border: none; background: transparent; font-size: 18px; font-weight: 700; text-align: center;
+            width: 100%; margin-bottom: 10px; outline: none; color: #37352f;
         }
         .integrated-settings {
-            background: #f4f4f4; border-radius: 12px; padding: 6px 12px;
-            margin-bottom: 25px; display: inline-flex; align-items: center; gap: 8px;
+            background: #f4f4f4; border-radius: 8px; padding: 4px 8px;
+            margin-bottom: 20px; display: inline-flex; align-items: center; gap: 5px;
         }
         input[type="datetime-local"] { 
-            border: none; background: transparent; font-size: 12px; outline: none; 
-            font-weight: 600; cursor: pointer; color: #37352f !important;
+            border: none; background: transparent; font-size: 11px; outline: none; cursor: pointer;
         }
-        .color-wrapper { display: flex; align-items: center; border-left: 1px solid #ddd; padding-left: 10px; }
+        /* 컬러피커 찌그러짐 방지 고정 */
         input[type="color"] {
-            width: 22px !important; height: 22px !important; border: none; cursor: pointer; 
+            width: 18px !important; height: 18px !important; border: none; cursor: pointer; 
             background: none; border-radius: 50% !important; -webkit-appearance: none; padding: 0; flex-shrink: 0;
         }
         input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
         input[type="color"]::-webkit-color-swatch { border: none; border-radius: 50%; }
 
-        .timer-container { display: flex; justify-content: center; gap: 8px; width: 100%; }
-        .time-box { color: white; border-radius: 14px; width: 65px; height: 65px; display: flex; flex-direction: column; justify-content: center; align-items: center; flex-shrink: 0; }
-        .number { font-size: 24px; font-weight: 700; display: block; line-height: 1; margin-bottom: 4px; }
-        .label { font-size: 8px; text-transform: uppercase; opacity: 0.9; font-weight: 700; }
+        .timer-container { display: flex; justify-content: center; gap: 5px; }
+        .time-box { 
+            color: white; border-radius: 10px; padding: 10px 0;
+            width: 55px; height: 55px; display: flex; flex-direction: column; 
+            justify-content: center; align-items: center; flex-shrink: 0;
+        }
+        .number { font-size: 20px; font-weight: 700; line-height: 1.1; }
+        .label { font-size: 8px; text-transform: uppercase; opacity: 0.8; font-weight: 600; }
     </style>
 </head>
 <body>
@@ -43,7 +47,7 @@
         <input type="text" id="projectTitle" class="title-input" placeholder="Untitled">
         <div class="integrated-settings">
             <input type="datetime-local" id="targetDate">
-            <div class="color-wrapper"><input type="color" id="colorPicker" value="#222222"></div>
+            <input type="color" id="colorPicker" value="#222222">
         </div>
         <div class="timer-container">
             <div class="time-box"><span class="number" id="days">00</span><span class="label">Days</span></div>
@@ -57,39 +61,47 @@
         const titleInput = document.getElementById('projectTitle');
         const dateInput = document.getElementById('targetDate');
         const colorPicker = document.getElementById('colorPicker');
-
-        // 1. 주소에서 데이터 가져오기 (공유받는 사람이 보는 로직)
-        function loadFromURL() {
-            const params = new URLSearchParams(window.location.search);
-            if (params.get('t')) titleInput.value = decodeURIComponent(params.get('t'));
-            if (params.get('d')) dateInput.value = params.get('d');
-            if (params.get('c')) {
-                const color = '#' + params.get('c');
-                colorPicker.value = color;
-                applyColor(color);
-            }
-        }
-
-        // 2. 입력할 때마다 주소창 업데이트 (공유용 주소 자동 생성)
-        function updateURL() {
-            const params = new URLSearchParams();
-            if (titleInput.value) params.set('t', titleInput.value);
-            if (dateInput.value) params.set('d', dateInput.value);
-            params.set('c', colorPicker.value.replace('#', ''));
-            
-            const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?' + params.toString();
-            window.history.replaceState({}, '', newUrl); // 새로고침 없이 주소만 바꿈
-            applyColor(colorPicker.value);
-        }
+        const STORAGE_KEY = 'shared_timer_data';
 
         function applyColor(color) {
             titleInput.style.color = color;
             document.querySelectorAll('.time-box').forEach(box => box.style.backgroundColor = color);
         }
 
-        titleInput.addEventListener('input', updateURL);
-        dateInput.addEventListener('input', updateURL);
-        colorPicker.addEventListener('input', updateURL);
+        // 데이터 저장 (URL + LocalStorage 둘 다)
+        function saveData() {
+            const val = { t: titleInput.value, d: dateInput.value, c: colorPicker.value.replace('#','') };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(val));
+            
+            const params = new URLSearchParams(val);
+            const newUrl = window.location.origin + window.location.pathname + '?' + params.toString();
+            window.history.replaceState({}, '', newUrl);
+            applyColor(colorPicker.value);
+        }
+
+        // 데이터 불러오기 (URL 우선, 없으면 LocalStorage)
+        function loadData() {
+            const params = new URLSearchParams(window.location.search);
+            let data = { t: params.get('t'), d: params.get('d'), c: params.get('c') };
+
+            if (!data.t && !data.d) {
+                const local = localStorage.getItem(STORAGE_KEY);
+                if (local) data = JSON.parse(local);
+            }
+
+            if (data.t) titleInput.value = decodeURIComponent(data.t);
+            if (data.d) dateInput.value = data.d;
+            if (data.c) {
+                colorPicker.value = '#' + data.c;
+                applyColor('#' + data.c);
+            } else {
+                applyColor(colorPicker.value);
+            }
+        }
+
+        titleInput.addEventListener('input', saveData);
+        dateInput.addEventListener('input', saveData);
+        colorPicker.addEventListener('input', saveData);
 
         function updateTimer() {
             if (!dateInput.value) return;
@@ -108,7 +120,7 @@
             document.getElementById("seconds").innerText = String(s).padStart(2, '0');
         }
 
-        loadFromURL();
+        loadData();
         setInterval(updateTimer, 1000);
         updateTimer();
     </script>
