@@ -7,7 +7,6 @@
             height: 100vh; margin: 0; overflow: hidden;
             font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
         }
-        /* [슬림 디자인] 패딩과 간격을 최소화하여 좌우 여백 제거 */
         .card { 
             background: white; border-radius: 16px; padding: 20px 10px; 
             box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; 
@@ -21,10 +20,7 @@
             background: #f4f4f4; border-radius: 8px; padding: 4px 8px;
             margin-bottom: 20px; display: inline-flex; align-items: center; gap: 5px;
         }
-        input[type="datetime-local"] { 
-            border: none; background: transparent; font-size: 11px; outline: none; cursor: pointer;
-        }
-        /* 컬러피커 찌그러짐 방지 고정 */
+        input[type="datetime-local"] { border: none; background: transparent; font-size: 11px; outline: none; }
         input[type="color"] {
             width: 18px !important; height: 18px !important; border: none; cursor: pointer; 
             background: none; border-radius: 50% !important; -webkit-appearance: none; padding: 0; flex-shrink: 0;
@@ -61,27 +57,40 @@
         const titleInput = document.getElementById('projectTitle');
         const dateInput = document.getElementById('targetDate');
         const colorPicker = document.getElementById('colorPicker');
-        const STORAGE_KEY = 'shared_timer_data';
+
+        // [핵심] 1. ID가 없으면 생성하고 주소에 고정시킴
+        let params = new URLSearchParams(window.location.search);
+        let widgetId = params.get('id');
+
+        if (!widgetId) {
+            // ID가 없으면 랜덤 생성 (예: id_a1b2c3)
+            widgetId = 'id_' + Math.random().toString(36).substr(2, 6);
+            params.set('id', widgetId);
+            // 주소창에 ID를 강제로 붙임 (새로고침 시 이걸 읽게 됨)
+            const newUrl = window.location.origin + window.location.pathname + '?' + params.toString();
+            window.history.replaceState({}, '', newUrl);
+        }
+
+        const STORAGE_KEY = `timer_data_${widgetId}`;
 
         function applyColor(color) {
             titleInput.style.color = color;
             document.querySelectorAll('.time-box').forEach(box => box.style.backgroundColor = color);
         }
 
-        // 데이터 저장 (URL + LocalStorage 둘 다)
         function saveData() {
             const val = { t: titleInput.value, d: dateInput.value, c: colorPicker.value.replace('#','') };
             localStorage.setItem(STORAGE_KEY, JSON.stringify(val));
             
-            const params = new URLSearchParams(val);
-            const newUrl = window.location.origin + window.location.pathname + '?' + params.toString();
+            // 데이터 변경 시 URL 업데이트 (ID 유지)
+            const currentParams = new URLSearchParams(val);
+            currentParams.set('id', widgetId);
+            const newUrl = window.location.origin + window.location.pathname + '?' + currentParams.toString();
             window.history.replaceState({}, '', newUrl);
             applyColor(colorPicker.value);
         }
 
-        // 데이터 불러오기 (URL 우선, 없으면 LocalStorage)
         function loadData() {
-            const params = new URLSearchParams(window.location.search);
             let data = { t: params.get('t'), d: params.get('d'), c: params.get('c') };
 
             if (!data.t && !data.d) {
