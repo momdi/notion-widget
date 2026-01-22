@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
     <style>
         body { 
             background: transparent; display: flex; justify-content: center; align-items: center; 
@@ -10,37 +11,49 @@
         .card { 
             background: white; border-radius: 16px; padding: 20px 10px; 
             box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; 
-            width: 320px; margin: 0 auto; /* 노션 최적화 너비 */
+            width: 320px; margin: 0 auto; position: relative;
         }
         .title-input {
             border: none; background: transparent; font-size: 18px; font-weight: 700; text-align: center;
             width: 100%; margin-bottom: 10px; outline: none; color: #37352f;
         }
         .integrated-settings {
-            background: #f4f4f4; border-radius: 8px; padding: 4px 8px;
-            margin-bottom: 20px; display: inline-flex; align-items: center; gap: 5px;
+            background: #f4f4f4; border-radius: 8px; padding: 6px;
+            margin-bottom: 20px; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
         }
-        input[type="datetime-local"] { border: none; background: transparent; font-size: 11px; outline: none; cursor: pointer; }
+        input[type="datetime-local"] { border: none; background: transparent; font-size: 11px; outline: none; cursor: pointer; color: #555;}
         input[type="color"] {
-            width: 18px !important; height: 18px !important; border: none; cursor: pointer; 
+            width: 20px !important; height: 20px !important; border: none; cursor: pointer; 
             background: none; border-radius: 50% !important; -webkit-appearance: none; padding: 0; flex-shrink: 0;
         }
         input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
         input[type="color"]::-webkit-color-swatch { border: none; border-radius: 50%; }
 
-        .timer-container { display: flex; justify-content: center; gap: 5px; }
+        .timer-container { display: flex; justify-content: center; gap: 6px; }
         .time-box { 
             color: white; border-radius: 10px; padding: 10px 0;
-            width: 55px; height: 55px; display: flex; flex-direction: column; 
+            width: 60px; height: 60px; display: flex; flex-direction: column; 
             justify-content: center; align-items: center; flex-shrink: 0;
+            transition: background 0.3s;
         }
-        .number { font-size: 20px; font-weight: 700; line-height: 1.1; }
+        .number { font-size: 20px; font-weight: 700; line-height: 1.1; margin-bottom: 2px; }
         .label { font-size: 8px; text-transform: uppercase; opacity: 0.8; font-weight: 600; }
+
+        /* 노션에 넣기 위한 링크 복사 버튼 (평소엔 숨김, 마우스 올리면 보임) */
+        .copy-btn {
+            display: none; /* 노션에서는 안 보이게 함 */
+            margin-top: 15px; padding: 8px 16px; font-size: 12px; font-weight: 600;
+            background: #2eaadc; color: white; border: none; border-radius: 6px; cursor: pointer;
+        }
+        /* 브라우저에서 직접 열었을 때만 버튼 표시 */
+        @media screen and (min-height: 200px) {
+            .show-in-browser { display: inline-block; }
+        }
     </style>
 </head>
 <body>
     <div class="card">
-        <input type="text" id="projectTitle" class="title-input" placeholder="Untitled">
+        <input type="text" id="projectTitle" class="title-input" placeholder="제목 입력 (예: 기말고사)">
         <div class="integrated-settings">
             <input type="datetime-local" id="targetDate">
             <input type="color" id="colorPicker" value="#222222">
@@ -51,6 +64,7 @@
             <div class="time-box"><span class="number" id="minutes">00</span><span class="label">Min</span></div>
             <div class="time-box"><span class="number" id="seconds">00</span><span class="label">Sec</span></div>
         </div>
+        <button id="copyBtn" class="copy-btn show-in-browser" onclick="copyLink()">🔗 노션 공유용 링크 복사</button>
     </div>
 
     <script>
@@ -58,63 +72,45 @@
         const dateInput = document.getElementById('targetDate');
         const colorPicker = document.getElementById('colorPicker');
 
-        // 1. 고유 ID 생성 및 유지 로직 (다중 위젯 지원 핵심)
-        let params = new URLSearchParams(window.location.search);
-        let widgetId = params.get('id');
-
-        if (!widgetId) {
-            // ID가 없으면 랜덤 생성 후 주소창에 강제 삽입
-            widgetId = 'w_' + Math.random().toString(36).substr(2, 9);
-            params.set('id', widgetId);
-            const newUrl = window.location.origin + window.location.pathname + '?' + params.toString();
-            window.history.replaceState({}, '', newUrl);
-        }
-
-        const STORAGE_KEY = `notion_dday_${widgetId}`;
-
         function applyColor(color) {
             titleInput.style.color = color;
             document.querySelectorAll('.time-box').forEach(box => box.style.backgroundColor = color);
         }
 
-        // 2. 데이터 저장 (LocalStorage + URL)
-        function saveData() {
-            const data = {
-                t: titleInput.value,
-                d: dateInput.value,
-                c: colorPicker.value.replace('#', '')
-            };
+        // 주소 생성 및 업데이트
+        function updateState() {
+            const params = new URLSearchParams();
+            params.set('t', encodeURIComponent(titleInput.value)); // 한글 깨짐 방지
+            params.set('d', dateInput.value);
+            params.set('c', colorPicker.value.replace('#', ''));
             
-            // 기기에 저장 (새로고침 대비)
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-            
-            // URL 파라미터 업데이트 (공유 대비)
-            const currentParams = new URLSearchParams(window.location.search);
-            currentParams.set('t', data.t);
-            currentParams.set('d', data.d);
-            currentParams.set('c', data.c);
-            
-            const newUrl = window.location.origin + window.location.pathname + '?' + currentParams.toString();
+            const newUrl = window.location.origin + window.location.pathname + '?' + params.toString();
             window.history.replaceState({}, '', newUrl);
-            
             applyColor(colorPicker.value);
         }
 
-        // 3. 데이터 로드 (URL 우선 -> 없으면 기기 저장값)
-        function loadData() {
-            const urlData = {
-                t: params.get('t'),
-                d: params.get('d'),
-                c: params.get('c')
-            };
+        // 초기 데이터 로드
+        function loadFromURL() {
+            const params = new URLSearchParams(window.location.search);
+            
+            if (params.get('t')) titleInput.value = decodeURIComponent(params.get('t'));
+            
+            // 날짜가 없으면 오늘 날짜로 기본 설정 안함 (사용자가 직접 선택하게)
+            if (params.get('d')) dateInput.value = params.get('d');
+            
+            const color = params.get('c') ? '#' + params.get('c') : '#222222';
+            colorPicker.value = color;
+            applyColor(color);
+        }
 
-            const localData = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-
-            titleInput.value = urlData.t ? decodeURIComponent(urlData.t) : (localData.t || "");
-            dateInput.value = urlData.d || localData.d || "";
-            const color = urlData.c || localData.c || "222222";
-            colorPicker.value = '#' + color;
-            applyColor('#' + color);
+        // [중요] 링크 복사 기능
+        function copyLink() {
+            const url = window.location.href;
+            navigator.clipboard.writeText(url).then(() => {
+                const btn = document.getElementById('copyBtn');
+                btn.innerText = "✅ 복사 완료! 노션에 붙여넣으세요";
+                setTimeout(() => btn.innerText = "🔗 노션 공유용 링크 복사", 2000);
+            });
         }
 
         function updateTimer() {
@@ -134,13 +130,20 @@
             document.getElementById("seconds").innerText = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
         }
 
-        titleInput.addEventListener('input', saveData);
-        dateInput.addEventListener('input', saveData);
-        colorPicker.addEventListener('input', saveData);
+        titleInput.addEventListener('input', updateState);
+        dateInput.addEventListener('input', updateState);
+        colorPicker.addEventListener('input', updateState);
 
-        loadData();
+        loadFromURL();
         setInterval(updateTimer, 1000);
         updateTimer();
+        
+        // 노션 임베드 환경인지 감지하여 버튼 숨기기 처리
+        if (window.self !== window.top) {
+            document.getElementById('copyBtn').style.display = 'none';
+        } else {
+            document.getElementById('copyBtn').style.display = 'inline-block';
+        }
     </script>
 </body>
 </html>
