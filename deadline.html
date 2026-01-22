@@ -5,32 +5,28 @@
         body { background: transparent; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: -apple-system, sans-serif; }
         .card { background: white; border-radius: 20px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; width: fit-content; }
         
+        /* 프로젝트 타이틀 입력창 */
+        .title-input {
+            border: none; background: transparent; font-size: 18px; font-weight: 800; text-align: center;
+            width: 100%; margin-bottom: 15px; outline: none; transition: color 0.3s ease;
+        }
+        .title-input::placeholder { color: #ccc; font-weight: 400; }
+
         /* 설정 영역 */
-        .settings-group { margin-bottom: 20px; display: flex; gap: 12px; justify-content: center; align-items: center; }
+        .settings-group { margin-bottom: 20px; display: flex; gap: 10px; justify-content: center; align-items: center; }
         
-        /* 날짜 입력창 스타일 */
         input[type="datetime-local"] { 
-            border: none; background: #f4f4f4; border-radius: 8px; padding: 8px 12px; font-size: 13px; outline: none; font-weight: 600; color: #444;
-            font-family: inherit; cursor: pointer;
+            border: none; background: #f4f4f4; border-radius: 8px; padding: 8px 12px; font-size: 13px; outline: none; font-weight: 600; cursor: pointer;
         }
 
-        /* 🎨 컬러 피커를 예쁜 동그라미로 만들기 */
         .color-wrapper {
             width: 28px; height: 28px; border-radius: 50%; overflow: hidden; border: 2px solid #eee;
             display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s;
         }
         .color-wrapper:hover { transform: scale(1.1); }
-        
-        input[type="color"] {
-            border: none; width: 50px; height: 50px; cursor: pointer; background: none; padding: 0; transform: scale(2);
-        }
+        input[type="color"] { border: none; width: 50px; height: 50px; cursor: pointer; background: none; padding: 0; transform: scale(2); }
         
         /* 타이머 디자인 */
         .timer-container { display: flex; justify-content: center; gap: 10px; }
         .time-box { 
-            background: #111; color: white; border-radius: 12px; padding: 15px 12px; min-width: 55px; 
-            transition: background 0.3s ease; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-
-        .number { font-size: 26px; font-weight: 800; display: block; line-height: 1; margin-bottom: 5px; }
-        .label { font-size: 9px; text-transform: uppercase; opacity: 0.8
+            background: #111; color: white; border-radius: 1
