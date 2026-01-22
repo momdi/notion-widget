@@ -7,10 +7,11 @@
             height: 100vh; margin: 0; overflow: hidden;
             font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
         }
+        /* [슬림 디자인] 여백 최소화 */
         .card { 
             background: white; border-radius: 16px; padding: 20px 10px; 
             box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; 
-            width: fit-content; margin: 0 auto;
+            width: 320px; margin: 0 auto;
         }
         .title-input {
             border: none; background: transparent; font-size: 18px; font-weight: 700; text-align: center;
@@ -58,59 +59,39 @@
         const dateInput = document.getElementById('targetDate');
         const colorPicker = document.getElementById('colorPicker');
 
-        // [핵심] 1. ID가 없으면 생성하고 주소에 고정시킴
-        let params = new URLSearchParams(window.location.search);
-        let widgetId = params.get('id');
-
-        if (!widgetId) {
-            // ID가 없으면 랜덤 생성 (예: id_a1b2c3)
-            widgetId = 'id_' + Math.random().toString(36).substr(2, 6);
-            params.set('id', widgetId);
-            // 주소창에 ID를 강제로 붙임 (새로고침 시 이걸 읽게 됨)
-            const newUrl = window.location.origin + window.location.pathname + '?' + params.toString();
-            window.history.replaceState({}, '', newUrl);
-        }
-
-        const STORAGE_KEY = `timer_data_${widgetId}`;
-
         function applyColor(color) {
             titleInput.style.color = color;
             document.querySelectorAll('.time-box').forEach(box => box.style.backgroundColor = color);
         }
 
-        function saveData() {
-            const val = { t: titleInput.value, d: dateInput.value, c: colorPicker.value.replace('#','') };
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(val));
+        // 주소창 업데이트 (사용자가 수동으로 노션에 다시 붙여넣기 위한 주소 생성)
+        function updateURL() {
+            const params = new URLSearchParams();
+            if (titleInput.value) params.set('t', titleInput.value);
+            if (dateInput.value) params.set('d', dateInput.value);
+            params.set('c', colorPicker.value.replace('#', ''));
             
-            // 데이터 변경 시 URL 업데이트 (ID 유지)
-            const currentParams = new URLSearchParams(val);
-            currentParams.set('id', widgetId);
-            const newUrl = window.location.origin + window.location.pathname + '?' + currentParams.toString();
+            const newUrl = window.location.origin + window.location.pathname + '?' + params.toString();
             window.history.replaceState({}, '', newUrl);
             applyColor(colorPicker.value);
         }
 
-        function loadData() {
-            let data = { t: params.get('t'), d: params.get('d'), c: params.get('c') };
-
-            if (!data.t && !data.d) {
-                const local = localStorage.getItem(STORAGE_KEY);
-                if (local) data = JSON.parse(local);
-            }
-
-            if (data.t) titleInput.value = decodeURIComponent(data.t);
-            if (data.d) dateInput.value = data.d;
-            if (data.c) {
-                colorPicker.value = '#' + data.c;
-                applyColor('#' + data.c);
+        // 주소창에서 데이터 읽기
+        function loadFromURL() {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('t')) titleInput.value = decodeURIComponent(params.get('t'));
+            if (params.get('d')) dateInput.value = params.get('d');
+            if (params.get('c')) {
+                colorPicker.value = '#' + params.get('c');
+                applyColor('#' + params.get('c'));
             } else {
                 applyColor(colorPicker.value);
             }
         }
 
-        titleInput.addEventListener('input', saveData);
-        dateInput.addEventListener('input', saveData);
-        colorPicker.addEventListener('input', saveData);
+        titleInput.addEventListener('input', updateURL);
+        dateInput.addEventListener('input', updateURL);
+        colorPicker.addEventListener('input', updateURL);
 
         function updateTimer() {
             if (!dateInput.value) return;
@@ -129,9 +110,4 @@
             document.getElementById("seconds").innerText = String(s).padStart(2, '0');
         }
 
-        loadData();
-        setInterval(updateTimer, 1000);
-        updateTimer();
-    </script>
-</body>
-</html>
+        loadFromURL();
