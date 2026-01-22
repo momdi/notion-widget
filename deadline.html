@@ -19,34 +19,41 @@
         }
         .title-input::placeholder { color: #ccc; }
 
-        /* [핵심] 날짜와 색상을 하나의 캡슐 안에 통합 */
+        /* 통합 설정 바 (날짜 + 색상점 + 컬러코드) */
         .integrated-settings {
-            background: #f4f4f4; /* 노션의 연한 회색 배경 */
+            background: #f4f4f4;
             border-radius: 10px;
-            padding: 4px 10px;
+            padding: 4px 12px;
             margin-bottom: 22px;
             display: inline-flex;
             align-items: center;
-            gap: 5px;
+            gap: 8px;
         }
         
-        /* 날짜 입력: 노션 블랙(#37352f) 고정 */
+        /* 날짜 입력: 노션 블랙 고정 */
         input[type="datetime-local"] { 
             border: none; background: transparent; font-size: 13px; outline: none; 
             font-weight: 600; cursor: pointer; font-family: inherit; color: #37352f !important;
         }
 
-        /* 색상 피커 버튼 */
-        .color-picker-wrapper {
-            position: relative; width: 18px; height: 18px; 
-            display: flex; align-items: center; justify-content: center;
-            border-left: 1px solid #ddd; padding-left: 8px; margin-left: 3px;
+        /* 세로 구분선 */
+        .divider { width: 1px; height: 14px; background: #ddd; }
+
+        /* 컬러 코드 입력창 */
+        .hex-input {
+            border: none; background: transparent; font-size: 11px; width: 55px;
+            font-family: monospace; font-weight: 600; outline: none; color: #666;
+            text-transform: uppercase;
         }
 
+        /* 색상 피커 버튼 */
+        .color-picker-wrapper {
+            position: relative; width: 16px; height: 16px; 
+            display: flex; align-items: center; justify-content: center;
+        }
         input[type="color"] {
             position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; z-index: 2;
         }
-
         .color-dot {
             width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.1); transition: background 0.3s;
         }
@@ -72,10 +79,15 @@
 
         <div class="integrated-settings">
             <input type="datetime-local" id="targetDate" onchange="saveData()">
+            
+            <div class="divider"></div>
+            
             <div class="color-picker-wrapper">
                 <div id="colorDot" class="color-dot"></div>
-                <input type="color" id="colorPicker" value="#222222" onchange="saveData()">
+                <input type="color" id="colorPicker" onchange="syncFromPicker()">
             </div>
+            
+            <input type="text" id="hexInput" class="hex-input" maxlength="7" oninput="syncFromHex()">
         </div>
 
         <div class="timer-container">
@@ -90,62 +102,5 @@
         const titleInput = document.getElementById('projectTitle');
         const dateInput = document.getElementById('targetDate');
         const colorPicker = document.getElementById('colorPicker');
+        const hexInput = document.getElementById('hexInput');
         const colorDot = document.getElementById('colorDot');
-
-        const savedTitle = localStorage.getItem('projectTitle');
-        const savedDate = localStorage.getItem('deadline');
-        const savedColor = localStorage.getItem('pointColor');
-
-        if (savedTitle) titleInput.value = savedTitle;
-        if (savedDate) dateInput.value = savedDate;
-        
-        const initialColor = savedColor || "#222222";
-        colorPicker.value = initialColor;
-        applyColor(initialColor);
-
-        function saveData() {
-            localStorage.setItem('projectTitle', titleInput.value);
-            localStorage.setItem('deadline', dateInput.value);
-            localStorage.setItem('pointColor', colorPicker.value);
-            applyColor(colorPicker.value);
-        }
-
-        function applyColor(color) {
-            titleInput.style.color = color;
-            document.querySelectorAll('.time-box').forEach(box => box.style.backgroundColor = color);
-            colorDot.style.backgroundColor = color;
-        }
-
-        function updateTimer() {
-            const target = dateInput.value;
-            if (!target) return;
-            const diff = new Date(target) - new Date();
-            if (diff <= 0) {
-                ["days","hours","minutes","seconds"].forEach(id => document.getElementById(id).innerText = "00");
-                return;
-            }
-            const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-            const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
-            const m = Math.floor((diff / (1000 * 60)) % 60);
-            const s = Math.floor((diff / 1000) % 60);
-            updateElement("days", d);
-            updateElement("hours", h);
-            updateElement("minutes", m);
-            updateElement("seconds", s);
-        }
-
-        function updateElement(id, value) {
-            const el = document.getElementById(id);
-            const newVal = String(value).padStart(2, '0');
-            if (el.innerText !== newVal) {
-                el.innerText = newVal;
-                el.classList.add("animate");
-                setTimeout(() => el.classList.remove("animate"), 150);
-            }
-        }
-
-        setInterval(updateTimer, 1000);
-        updateTimer();
-    </script>
-</body>
-</html>
