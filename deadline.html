@@ -10,7 +10,7 @@
         .card { 
             background: white; border-radius: 16px; padding: 20px 10px; 
             box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; 
-            width: 380px; margin: 0 auto;
+            width: 320px; margin: 0 auto; /* 노션 최적화 너비 */
         }
         .title-input {
             border: none; background: transparent; font-size: 18px; font-weight: 700; text-align: center;
@@ -20,7 +20,7 @@
             background: #f4f4f4; border-radius: 8px; padding: 4px 8px;
             margin-bottom: 20px; display: inline-flex; align-items: center; gap: 5px;
         }
-        input[type="datetime-local"] { border: none; background: transparent; font-size: 11px; outline: none; }
+        input[type="datetime-local"] { border: none; background: transparent; font-size: 11px; outline: none; cursor: pointer; }
         input[type="color"] {
             width: 18px !important; height: 18px !important; border: none; cursor: pointer; 
             background: none; border-radius: 50% !important; -webkit-appearance: none; padding: 0; flex-shrink: 0;
@@ -58,41 +58,67 @@
         const dateInput = document.getElementById('targetDate');
         const colorPicker = document.getElementById('colorPicker');
 
-        // URL 파라미터 업데이트 (공유 및 개별 저장을 위함)
-        function updateURL() {
-            const params = new URLSearchParams(window.location.search);
-            params.set('t', titleInput.value);
-            params.set('d', dateInput.value);
-            params.set('c', colorPicker.value.replace('#', ''));
-            
+        // 1. 고유 ID 생성 및 유지 로직 (다중 위젯 지원 핵심)
+        let params = new URLSearchParams(window.location.search);
+        let widgetId = params.get('id');
+
+        if (!widgetId) {
+            // ID가 없으면 랜덤 생성 후 주소창에 강제 삽입
+            widgetId = 'w_' + Math.random().toString(36).substr(2, 9);
+            params.set('id', widgetId);
             const newUrl = window.location.origin + window.location.pathname + '?' + params.toString();
             window.history.replaceState({}, '', newUrl);
-            applyColor(colorPicker.value);
         }
+
+        const STORAGE_KEY = `notion_dday_${widgetId}`;
 
         function applyColor(color) {
             titleInput.style.color = color;
             document.querySelectorAll('.time-box').forEach(box => box.style.backgroundColor = color);
         }
 
-        // 초기 데이터 로드 (URL에서 값을 읽어옴)
-        function loadData() {
-            const params = new URLSearchParams(window.location.search);
-            if (params.get('t')) titleInput.value = decodeURIComponent(params.get('t'));
-            if (params.get('d')) dateInput.value = params.get('d');
-            if (params.get('c')) {
-                const color = '#' + params.get('c');
-                colorPicker.value = color;
-                applyColor(color);
-            } else {
-                applyColor(colorPicker.value);
-            }
+        // 2. 데이터 저장 (LocalStorage + URL)
+        function saveData() {
+            const data = {
+                t: titleInput.value,
+                d: dateInput.value,
+                c: colorPicker.value.replace('#', '')
+            };
+            
+            // 기기에 저장 (새로고침 대비)
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            
+            // URL 파라미터 업데이트 (공유 대비)
+            const currentParams = new URLSearchParams(window.location.search);
+            currentParams.set('t', data.t);
+            currentParams.set('d', data.d);
+            currentParams.set('c', data.c);
+            
+            const newUrl = window.location.origin + window.location.pathname + '?' + currentParams.toString();
+            window.history.replaceState({}, '', newUrl);
+            
+            applyColor(colorPicker.value);
         }
 
-        // 타이머 계산 로직 (오차 방지)
+        // 3. 데이터 로드 (URL 우선 -> 없으면 기기 저장값)
+        function loadData() {
+            const urlData = {
+                t: params.get('t'),
+                d: params.get('d'),
+                c: params.get('c')
+            };
+
+            const localData = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+
+            titleInput.value = urlData.t ? decodeURIComponent(urlData.t) : (localData.t || "");
+            dateInput.value = urlData.d || localData.d || "";
+            const color = urlData.c || localData.c || "222222";
+            colorPicker.value = '#' + color;
+            applyColor('#' + color);
+        }
+
         function updateTimer() {
             if (!dateInput.value) return;
-            
             const now = new Date().getTime();
             const target = new Date(dateInput.value).getTime();
             const diff = target - now;
@@ -102,20 +128,15 @@
                 return;
             }
 
-            const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-            const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            const s = Math.floor((diff % (1000 * 60)) / 1000);
-
-            document.getElementById("days").innerText = String(d).padStart(2, '0');
-            document.getElementById("hours").innerText = String(h).padStart(2, '0');
-            document.getElementById("minutes").innerText = String(m).padStart(2, '0');
-            document.getElementById("seconds").innerText = String(s).padStart(2, '0');
+            document.getElementById("days").innerText = String(Math.floor(diff / 86400000)).padStart(2, '0');
+            document.getElementById("hours").innerText = String(Math.floor((diff % 86400000) / 3600000)).padStart(2, '0');
+            document.getElementById("minutes").innerText = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
+            document.getElementById("seconds").innerText = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
         }
 
-        titleInput.addEventListener('input', updateURL);
-        dateInput.addEventListener('input', updateURL);
-        colorPicker.addEventListener('input', updateURL);
+        titleInput.addEventListener('input', saveData);
+        dateInput.addEventListener('input', saveData);
+        colorPicker.addEventListener('input', saveData);
 
         loadData();
         setInterval(updateTimer, 1000);
