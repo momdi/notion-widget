@@ -6,78 +6,56 @@
             background: transparent; 
             display: flex; justify-content: center; align-items: center; 
             height: 100vh; margin: 0; 
-            font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            font-family: ui-sans-serif, -apple-system, sans-serif;
         }
 
-        .card { background: white; border-radius: 20px; padding: 25px 0px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); text-align: center; width: fit-content; }
+        /* [요청반영] 가로 여백을 극한으로 줄임 */
+        .card { 
+            background: white; 
+            border-radius: 14px; 
+            padding: 15px 6px; /* 좌우 여백 6px로 최소화 */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
+            text-align: center; 
+            width: fit-content; 
+        }
         
-        /* 제목: 포인트 컬러 적용 */
         .title-input {
-            border: none; background: transparent; font-size: 19px; font-weight: 700; text-align: center;
-            width: 100%; margin-bottom: 12px; outline: none; transition: color 0.3s ease;
-            font-family: inherit;
+            border: none; background: transparent; font-size: 17px; font-weight: 700; text-align: center;
+            width: 100%; margin-bottom: 8px; outline: none; color: #37352f;
         }
-        .title-input::placeholder { color: #ccc; }
 
-        /* [핵심] 날짜와 색상을 하나의 캡슐 안에 통합 */
         .integrated-settings {
-            background: #f4f4f4; /* 노션의 연한 회색 배경 */
-            border-radius: 10px;
-            padding: 4px 10px;
-            margin-bottom: 22px;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
+            background: #f4f4f4; border-radius: 8px; padding: 3px 6px;
+            margin-bottom: 15px; display: inline-flex; align-items: center; gap: 4px;
         }
         
-        /* 날짜 입력: 노션 블랙(#37352f) 고정 */
         input[type="datetime-local"] { 
-            border: none; background: transparent; font-size: 13px; outline: none; 
-            font-weight: 600; cursor: pointer; font-family: inherit; color: #37352f !important;
+            border: none; background: transparent; font-size: 11px; outline: none; 
+            font-weight: 600; cursor: pointer; color: #37352f !important;
         }
 
-        /* 색상 피커 버튼 */
-        .color-picker-wrapper {
-            position: relative; width: 18px; height: 18px; 
-            display: flex; align-items: center; justify-content: center;
-            border-left: 1px solid #ddd; padding-left: 8px; margin-left: 3px;
-        }
-
-        input[type="color"] {
-            position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; z-index: 2;
-        }
-
-        .color-dot {
-            width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.1); transition: background 0.3s;
-        }
-        
-        /* 타이머 디자인 */
-        .timer-container { display: flex; justify-content: center; gap: 10px; }
+        /* 타이머 박스 가로 여백 및 크기 최적화 */
+        .timer-container { display: flex; justify-content: center; gap: 4px; }
         .time-box { 
-            color: white; border-radius: 14px; padding: 16px 12px; min-width: 52px; 
-            transition: background 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            color: white; border-radius: 8px; padding: 10px 0; min-width: 46px; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
         }
 
-        .number { font-size: 26px; font-weight: 700; display: block; line-height: 1; margin-bottom: 6px; }
-        .label { font-size: 9px; text-transform: uppercase; opacity: 0.7; font-weight: 600; letter-spacing: 0.5px; }
+        .number { font-size: 20px; font-weight: 700; display: block; line-height: 1; margin-bottom: 2px; }
+        .label { font-size: 7px; text-transform: uppercase; opacity: 0.8; font-weight: 600; }
 
-        @keyframes slideDown { 0% { transform: translateY(-3px); opacity: 0.8; } 100% { transform: translateY(0); opacity: 1; } }
+        @keyframes slideDown { 0% { transform: translateY(-2px); } 100% { transform: translateY(0); } }
         .animate { animation: slideDown 0.15s ease-out; }
     </style>
 </head>
 <body>
 
     <div class="card">
-        <input type="text" id="projectTitle" class="title-input" placeholder="Untitled Project" oninput="saveData()">
-
+        <input type="text" id="projectTitle" class="title-input" placeholder="Untitled">
         <div class="integrated-settings">
-            <input type="datetime-local" id="targetDate" onchange="saveData()">
-            <div class="color-picker-wrapper">
-                <div id="colorDot" class="color-dot"></div>
-                <input type="color" id="colorPicker" value="#222222" onchange="saveData()">
-            </div>
+            <input type="datetime-local" id="targetDate">
+            <input type="color" id="colorPicker" value="#222222" style="width:18px; height:18px; border:none; cursor:pointer; background:none; padding:0;">
         </div>
-
         <div class="timer-container">
             <div class="time-box"><span class="number" id="days">00</span><span class="label">Days</span></div>
             <div class="time-box"><span class="number" id="hours">00</span><span class="label">Hours</span></div>
@@ -87,65 +65,51 @@
     </div>
 
     <script>
+        /* [공유용 핵심 로직] 
+           1. 노션은 임베드마다 고유한 URL 매개변수를 생성하기도 합니다.
+           2. 만약 그것이 없다면, 현재 브라우저 탭의 고유 경로를 ID로 사용합니다. */
+        const storageKeyPrefix = window.location.href; 
+        
+        const KEY_TITLE = `title_${storageKeyPrefix}`;
+        const KEY_DATE = `date_${storageKeyPrefix}`;
+        const KEY_COLOR = `color_${storageKeyPrefix}`;
+
         const titleInput = document.getElementById('projectTitle');
         const dateInput = document.getElementById('targetDate');
         const colorPicker = document.getElementById('colorPicker');
-        const colorDot = document.getElementById('colorDot');
 
-        const savedTitle = localStorage.getItem('projectTitle');
-        const savedDate = localStorage.getItem('deadline');
-        const savedColor = localStorage.getItem('pointColor');
+        // 데이터 복구
+        if (localStorage.getItem(KEY_TITLE)) titleInput.value = localStorage.getItem(KEY_TITLE);
+        if (localStorage.getItem(KEY_DATE)) dateInput.value = localStorage.getItem(KEY_DATE);
+        const savedColor = localStorage.getItem(KEY_COLOR) || "#222222";
+        colorPicker.value = savedColor;
+        applyColor(savedColor);
 
-        if (savedTitle) titleInput.value = savedTitle;
-        if (savedDate) dateInput.value = savedDate;
-        
-        const initialColor = savedColor || "#222222";
-        colorPicker.value = initialColor;
-        applyColor(initialColor);
-
-        function saveData() {
-            localStorage.setItem('projectTitle', titleInput.value);
-            localStorage.setItem('deadline', dateInput.value);
-            localStorage.setItem('pointColor', colorPicker.value);
+        // 실시간 저장
+        function saveAll() {
+            localStorage.setItem(KEY_TITLE, titleInput.value);
+            localStorage.setItem(KEY_DATE, dateInput.value);
+            localStorage.setItem(KEY_COLOR, colorPicker.value);
             applyColor(colorPicker.value);
         }
+
+        [titleInput, dateInput, colorPicker].forEach(el => {
+            el.addEventListener('input', saveAll);
+        });
 
         function applyColor(color) {
             titleInput.style.color = color;
             document.querySelectorAll('.time-box').forEach(box => box.style.backgroundColor = color);
-            colorDot.style.backgroundColor = color;
         }
 
         function updateTimer() {
-            const target = dateInput.value;
-            if (!target) return;
-            const diff = new Date(target) - new Date();
-            if (diff <= 0) {
+            const target = new Date(dateInput.value);
+            const diff = target - new Date();
+            
+            if (isNaN(target) || diff <= 0) {
                 ["days","hours","minutes","seconds"].forEach(id => document.getElementById(id).innerText = "00");
                 return;
             }
-            const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-            const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
-            const m = Math.floor((diff / (1000 * 60)) % 60);
-            const s = Math.floor((diff / 1000) % 60);
-            updateElement("days", d);
-            updateElement("hours", h);
-            updateElement("minutes", m);
-            updateElement("seconds", s);
-        }
 
-        function updateElement(id, value) {
-            const el = document.getElementById(id);
-            const newVal = String(value).padStart(2, '0');
-            if (el.innerText !== newVal) {
-                el.innerText = newVal;
-                el.classList.add("animate");
-                setTimeout(() => el.classList.remove("animate"), 150);
-            }
-        }
-
-        setInterval(updateTimer, 1000);
-        updateTimer();
-    </script>
-</body>
-</html>
+            document.getElementById("days").innerText = String(Math.floor(diff / 86400000)).padStart(2, '0');
+            document.getElementById("
