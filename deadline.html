@@ -8,7 +8,7 @@
             font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
         }
         .card { 
-            background: white; border-radius: 24px; padding: 40px 10px; 
+            background: white; border-radius: 24px; padding: 45px 15px; 
             box-shadow: 0 10px 40px rgba(0,0,0,0.06); text-align: center; 
             width: 310px; margin: 0 auto; display: flex; flex-direction: column; align-items: center;
         }
@@ -31,6 +31,7 @@
         }
         input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
         input[type="color"]::-webkit-color-swatch { border: none; border-radius: 50%; }
+
         .timer-container { display: flex; justify-content: center; gap: 8px; width: 100%; }
         .time-box { color: white; border-radius: 14px; width: 65px; height: 65px; display: flex; flex-direction: column; justify-content: center; align-items: center; flex-shrink: 0; }
         .number { font-size: 24px; font-weight: 700; display: block; line-height: 1; margin-bottom: 4px; }
@@ -57,27 +58,27 @@
         const dateInput = document.getElementById('targetDate');
         const colorPicker = document.getElementById('colorPicker');
 
-        // 1. URL에서 데이터 읽기 (공유받은 사람이 보는 값)
+        // 1. 주소에서 데이터 가져오기 (공유받는 사람이 보는 로직)
         function loadFromURL() {
             const params = new URLSearchParams(window.location.search);
             if (params.get('t')) titleInput.value = decodeURIComponent(params.get('t'));
             if (params.get('d')) dateInput.value = params.get('d');
             if (params.get('c')) {
-                colorPicker.value = '#' + params.get('c');
-                applyColor('#' + params.get('c'));
+                const color = '#' + params.get('c');
+                colorPicker.value = color;
+                applyColor(color);
             }
         }
 
-        // 2. URL에 데이터 쓰기 (입력할 때마다 주소가 변함)
+        // 2. 입력할 때마다 주소창 업데이트 (공유용 주소 자동 생성)
         function updateURL() {
             const params = new URLSearchParams();
-            params.set('t', titleInput.value);
-            params.set('d', dateInput.value);
+            if (titleInput.value) params.set('t', titleInput.value);
+            if (dateInput.value) params.set('d', dateInput.value);
             params.set('c', colorPicker.value.replace('#', ''));
             
-            // 페이지 새로고침 없이 주소만 변경
             const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?' + params.toString();
-            window.history.replaceState({path: newUrl}, '', newUrl);
+            window.history.replaceState({}, '', newUrl); // 새로고침 없이 주소만 바꿈
             applyColor(colorPicker.value);
         }
 
