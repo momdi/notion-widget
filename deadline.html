@@ -9,57 +9,67 @@
             font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
         }
 
-        /* [수정] 좌우 여백을 극한으로 줄여 위젯에 딱 맞게 설정 */
+        /* [핵심 수정] 하얀 박스 사이즈를 타이머 박스들에 딱 맞게 강제 고정 */
         .card { 
             background: white; 
-            border-radius: 14px; 
-            padding: 15px 6px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
+            border-radius: 12px; 
+            /* 좌우 패딩을 4px로 극단적으로 줄여서 여백 제거 */
+            padding: 15px 4px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
             text-align: center; 
-            width: fit-content; 
+            /* 박스 전체 가로 길이를 타이머(48px*4 + 간격)에 맞춰 220px 정도로 강제 제한 */
+            width: 216px; 
+            margin: 0 auto;
+            overflow: hidden;
         }
         
         .title-input {
-            border: none; background: transparent; font-size: 17px; font-weight: 700; text-align: center;
-            width: 100%; margin-bottom: 8px; outline: none; transition: color 0.3s ease;
-            font-family: inherit; color: #37352f;
+            border: none; background: transparent; font-size: 16px; font-weight: 700; text-align: center;
+            width: 90%; margin-bottom: 8px; outline: none; color: #37352f;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
         }
-        .title-input::placeholder { color: #ccc; }
 
         .integrated-settings {
-            background: #f4f4f4; border-radius: 8px; padding: 3px 6px;
-            margin-bottom: 15px; display: inline-flex; align-items: center; gap: 4px;
+            background: #f4f4f4; border-radius: 6px; padding: 2px 4px;
+            margin-bottom: 12px; display: inline-flex; align-items: center; gap: 2px;
+            max-width: 95%;
         }
         
         input[type="datetime-local"] { 
-            border: none; background: transparent; font-size: 11px; outline: none; 
-            font-weight: 600; cursor: pointer; font-family: inherit; color: #37352f !important;
+            border: none; background: transparent; font-size: 10px; outline: none; 
+            font-weight: 600; cursor: pointer; color: #37352f !important; width: 135px;
         }
 
-        /* 타이머 디자인: 가로폭 압축 */
-        .timer-container { display: flex; justify-content: center; gap: 4px; }
+        /* 타이머 박스 사이 간격 밀착 */
+        .timer-container { 
+            display: flex; 
+            justify-content: center; 
+            gap: 3px; /* 간격을 4px에서 3px로 더 줄임 */
+            width: 100%;
+        }
+
         .time-box { 
-            color: white; border-radius: 10px; padding: 12px 0; min-width: 48px; 
-            transition: background 0.3s ease; box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            color: white; border-radius: 8px; 
+            padding: 10px 0; 
+            width: 48px; /* 가로 길이를 고정하여 균형 맞춤 */
+            flex-shrink: 0;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
         }
 
-        .number { font-size: 22px; font-weight: 700; display: block; line-height: 1; margin-bottom: 3px; }
-        .label { font-size: 8px; text-transform: uppercase; opacity: 0.8; font-weight: 600; letter-spacing: 0.5px; }
+        .number { font-size: 20px; font-weight: 700; display: block; line-height: 1; margin-bottom: 2px; }
+        .label { font-size: 7px; text-transform: uppercase; opacity: 0.8; font-weight: 600; }
 
-        @keyframes slideDown { 0% { transform: translateY(-2px); opacity: 0.8; } 100% { transform: translateY(0); opacity: 1; } }
+        @keyframes slideDown { 0% { transform: translateY(-2px); } 100% { transform: translateY(0); } }
         .animate { animation: slideDown 0.15s ease-out; }
     </style>
 </head>
 <body>
-
     <div class="card">
-        <input type="text" id="projectTitle" class="title-input" placeholder="Untitled Project">
-
+        <input type="text" id="projectTitle" class="title-input" placeholder="Untitled">
         <div class="integrated-settings">
             <input type="datetime-local" id="targetDate">
-            <input type="color" id="colorPicker" value="#222222" style="width:18px; height:18px; border:none; cursor:pointer; background:none; padding:0;">
+            <input type="color" id="colorPicker" value="#222222" style="width:16px; height:16px; border:none; cursor:pointer; background:none; padding:0; vertical-align:middle;">
         </div>
-
         <div class="timer-container">
             <div class="time-box"><span class="number" id="days">00</span><span class="label">Days</span></div>
             <div class="time-box"><span class="number" id="hours">00</span><span class="label">Hours</span></div>
@@ -69,34 +79,23 @@
     </div>
 
     <script>
-        // [핵심] 고유 ID 자동 생성 및 주소 유지 로직
         const urlParams = new URLSearchParams(window.location.search);
         let widgetId = urlParams.get('id');
-
         if (!widgetId) {
-            // ID가 없으면 랜덤 생성 후 주소창 업데이트 (사용자가 링크 복사 시 ID가 포함되도록)
             widgetId = 'id_' + Math.random().toString(36).substr(2, 9);
             urlParams.set('id', widgetId);
-            const newUrl = window.location.pathname + '?' + urlParams.toString();
-            window.history.replaceState({}, '', newUrl);
+            window.history.replaceState({}, '', window.location.pathname + '?' + urlParams.toString());
         }
 
-        const KEY_TITLE = `title_${widgetId}`;
-        const KEY_DATE = `date_${widgetId}`;
-        const KEY_COLOR = `color_${widgetId}`;
+        const KEY_TITLE = `title_${widgetId}`, KEY_DATE = `date_${widgetId}`, KEY_COLOR = `color_${widgetId}`;
+        const titleInput = document.getElementById('projectTitle'), dateInput = document.getElementById('targetDate'), colorPicker = document.getElementById('colorPicker');
 
-        const titleInput = document.getElementById('projectTitle');
-        const dateInput = document.getElementById('targetDate');
-        const colorPicker = document.getElementById('colorPicker');
-
-        // 데이터 복구
         if (localStorage.getItem(KEY_TITLE)) titleInput.value = localStorage.getItem(KEY_TITLE);
         if (localStorage.getItem(KEY_DATE)) dateInput.value = localStorage.getItem(KEY_DATE);
         const savedColor = localStorage.getItem(KEY_COLOR) || "#222222";
         colorPicker.value = savedColor;
         applyColor(savedColor);
 
-        // 저장 로직 통합
         function saveData() {
             localStorage.setItem(KEY_TITLE, titleInput.value);
             localStorage.setItem(KEY_DATE, dateInput.value);
@@ -104,9 +103,7 @@
             applyColor(colorPicker.value);
         }
 
-        [titleInput, dateInput, colorPicker].forEach(el => {
-            el.addEventListener('input', saveData);
-        });
+        [titleInput, dateInput, colorPicker].forEach(el => el.addEventListener('input', saveData));
 
         function applyColor(color) {
             titleInput.style.color = color;
@@ -114,24 +111,13 @@
         }
 
         function updateTimer() {
-            const target = dateInput.value;
-            if (!target) return;
-            const diff = new Date(target) - new Date();
-            
-            if (diff <= 0) {
+            const diff = new Date(dateInput.value) - new Date();
+            if (!dateInput.value || diff <= 0) {
                 ["days","hours","minutes","seconds"].forEach(id => document.getElementById(id).innerText = "00");
                 return;
             }
-
-            const d = Math.floor(diff / 86400000);
-            const h = Math.floor((diff / 3600000) % 24);
-            const m = Math.floor((diff / 60000) % 60);
-            const s = Math.floor((diff / 1000) % 60);
-
-            updateElement("days", d);
-            updateElement("hours", h);
-            updateElement("minutes", m);
-            updateElement("seconds", s);
+            const d = Math.floor(diff / 86400000), h = Math.floor((diff / 3600000) % 24), m = Math.floor((diff / 60000) % 60), s = Math.floor((diff / 1000) % 60);
+            updateElement("days", d); updateElement("hours", h); updateElement("minutes", m); updateElement("seconds", s);
         }
 
         function updateElement(id, value) {
@@ -143,9 +129,7 @@
                 setTimeout(() => el.classList.remove("animate"), 150);
             }
         }
-
-        setInterval(updateTimer, 1000);
-        updateTimer();
+        setInterval(updateTimer, 1000); updateTimer();
     </script>
 </body>
 </html>
