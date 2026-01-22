@@ -3,89 +3,46 @@
 <head>
     <style>
         body { 
-            background: transparent; 
-            display: flex; justify-content: center; align-items: center; 
-            height: 100vh; margin: 0; 
+            background: transparent; display: flex; justify-content: center; align-items: center; 
+            height: 100vh; margin: 0; overflow: hidden;
             font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
         }
-
-        /* [해결 1] 좌우 여백을 0으로 만들어 박스를 타이머에 딱 맞게 강제 압축 */
         .card { 
-            background: white; 
-            border-radius: 24px; 
-            /* 좌우 0px로 설정하여 불필요한 넓이 제거 */
-            padding: 50px 0px; 
-            box-shadow: 0 10px 40px rgba(0,0,0,0.06); 
-            text-align: center; 
-            width: fit-content;
-            margin: 0 auto;
-            /* 내부 요소들이 밖으로 나가지 않게 함 */
-            display: inline-block;
+            background: white; border-radius: 24px; padding: 40px 10px; 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.06); text-align: center; 
+            width: 310px; margin: 0 auto; display: flex; flex-direction: column; align-items: center;
         }
-        
         .title-input {
             border: none; background: transparent; font-size: 20px; font-weight: 800; text-align: center;
-            width: 100%; margin-bottom: 12px; outline: none; color: #37352f;
+            width: 90%; margin-bottom: 12px; outline: none; color: #37352f;
         }
-
         .integrated-settings {
-            background: #f4f4f4; border-radius: 10px; padding: 5px 10px;
+            background: #f4f4f4; border-radius: 12px; padding: 6px 12px;
             margin-bottom: 25px; display: inline-flex; align-items: center; gap: 8px;
         }
-        
         input[type="datetime-local"] { 
             border: none; background: transparent; font-size: 12px; outline: none; 
             font-weight: 600; cursor: pointer; color: #37352f !important;
         }
-
-        /* [해결 2] 컬러피커 찌그러짐 방지 - 크기 강제 고정 */
-        .color-wrapper {
-            display: flex; align-items: center; border-left: 1px solid #ddd; padding-left: 8px;
-        }
-        
+        .color-wrapper { display: flex; align-items: center; border-left: 1px solid #ddd; padding-left: 10px; }
         input[type="color"] {
-            /* 가로세로 비율 강제 고정 */
-            width: 20px !important; 
-            height: 20px !important; 
-            border: none; cursor: pointer; 
-            background: none; border-radius: 50%; -webkit-appearance: none;
-            padding: 0;
-            /* 절대 찌그러지지 않게 설정 */
-            flex-shrink: 0; 
+            width: 22px !important; height: 22px !important; border: none; cursor: pointer; 
+            background: none; border-radius: 50% !important; -webkit-appearance: none; padding: 0; flex-shrink: 0;
         }
-        
         input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
         input[type="color"]::-webkit-color-swatch { border: none; border-radius: 50%; }
-
-        /* 타이머 영역 */
-        .timer-container { 
-            display: flex; 
-            justify-content: center; 
-            gap: 8px; 
-            /* 박스 양옆에 약간의 숨통만 틔워줌 */
-            padding: 0 15px; 
-        }
-        
-        .time-box { 
-            color: white; border-radius: 14px; 
-            width: 65px; height: 65px; 
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            flex-shrink: 0;
-        }
-
+        .timer-container { display: flex; justify-content: center; gap: 8px; width: 100%; }
+        .time-box { color: white; border-radius: 14px; width: 65px; height: 65px; display: flex; flex-direction: column; justify-content: center; align-items: center; flex-shrink: 0; }
         .number { font-size: 24px; font-weight: 700; display: block; line-height: 1; margin-bottom: 4px; }
-        .label { font-size: 8px; text-transform: uppercase; opacity: 0.8; font-weight: 700; }
+        .label { font-size: 8px; text-transform: uppercase; opacity: 0.9; font-weight: 700; }
     </style>
 </head>
 <body>
-
     <div class="card">
         <input type="text" id="projectTitle" class="title-input" placeholder="Untitled">
         <div class="integrated-settings">
             <input type="datetime-local" id="targetDate">
-            <div class="color-wrapper">
-                <input type="color" id="colorPicker" value="#222222">
-            </div>
+            <div class="color-wrapper"><input type="color" id="colorPicker" value="#222222"></div>
         </div>
         <div class="timer-container">
             <div class="time-box"><span class="number" id="days">00</span><span class="label">Days</span></div>
@@ -96,39 +53,42 @@
     </div>
 
     <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        let widgetId = urlParams.get('id');
-        if (!widgetId) {
-            widgetId = 'id_' + Math.random().toString(36).substr(2, 9);
-            urlParams.set('id', widgetId);
-            window.history.replaceState({}, '', window.location.pathname + '?' + urlParams.toString());
+        const titleInput = document.getElementById('projectTitle');
+        const dateInput = document.getElementById('targetDate');
+        const colorPicker = document.getElementById('colorPicker');
+
+        // 1. URL에서 데이터 읽기 (공유받은 사람이 보는 값)
+        function loadFromURL() {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('t')) titleInput.value = decodeURIComponent(params.get('t'));
+            if (params.get('d')) dateInput.value = params.get('d');
+            if (params.get('c')) {
+                colorPicker.value = '#' + params.get('c');
+                applyColor('#' + params.get('c'));
+            }
         }
 
-        const KEY_TITLE = `title_${widgetId}`, KEY_DATE = `date_${widgetId}`, KEY_COLOR = `color_${widgetId}`;
-        const titleInput = document.getElementById('projectTitle'), 
-              dateInput = document.getElementById('targetDate'), 
-              colorPicker = document.getElementById('colorPicker');
-
-        if (localStorage.getItem(KEY_TITLE)) titleInput.value = localStorage.getItem(KEY_TITLE);
-        if (localStorage.getItem(KEY_DATE)) dateInput.value = localStorage.getItem(KEY_DATE);
-        
-        const savedColor = localStorage.getItem(KEY_COLOR) || "#222222";
-        colorPicker.value = savedColor;
-        applyColor(savedColor);
-
-        function saveData() {
-            localStorage.setItem(KEY_TITLE, titleInput.value);
-            localStorage.setItem(KEY_DATE, dateInput.value);
-            localStorage.setItem(KEY_COLOR, colorPicker.value);
+        // 2. URL에 데이터 쓰기 (입력할 때마다 주소가 변함)
+        function updateURL() {
+            const params = new URLSearchParams();
+            params.set('t', titleInput.value);
+            params.set('d', dateInput.value);
+            params.set('c', colorPicker.value.replace('#', ''));
+            
+            // 페이지 새로고침 없이 주소만 변경
+            const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?' + params.toString();
+            window.history.replaceState({path: newUrl}, '', newUrl);
             applyColor(colorPicker.value);
         }
-
-        [titleInput, dateInput, colorPicker].forEach(el => el.addEventListener('input', saveData));
 
         function applyColor(color) {
             titleInput.style.color = color;
             document.querySelectorAll('.time-box').forEach(box => box.style.backgroundColor = color);
         }
+
+        titleInput.addEventListener('input', updateURL);
+        dateInput.addEventListener('input', updateURL);
+        colorPicker.addEventListener('input', updateURL);
 
         function updateTimer() {
             if (!dateInput.value) return;
@@ -137,13 +97,19 @@
                 ["days","hours","minutes","seconds"].forEach(id => document.getElementById(id).innerText = "00");
                 return;
             }
-            const d = Math.floor(diff / 86400000), h = Math.floor((diff / 3600000) % 24), m = Math.floor((diff / 60000) % 60), s = Math.floor((diff / 1000) % 60);
+            const d = Math.floor(diff / 86400000);
+            const h = Math.floor((diff / 3600000) % 24);
+            const m = Math.floor((diff / 60000) % 60);
+            const s = Math.floor((diff / 1000) % 60);
             document.getElementById("days").innerText = String(d).padStart(2, '0');
             document.getElementById("hours").innerText = String(h).padStart(2, '0');
             document.getElementById("minutes").innerText = String(m).padStart(2, '0');
             document.getElementById("seconds").innerText = String(s).padStart(2, '0');
         }
-        setInterval(updateTimer, 1000); updateTimer();
+
+        loadFromURL();
+        setInterval(updateTimer, 1000);
+        updateTimer();
     </script>
 </body>
 </html>
