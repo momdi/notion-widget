@@ -7,11 +7,10 @@
             height: 100vh; margin: 0; overflow: hidden;
             font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
         }
-        /* [슬림 디자인] 여백 최소화 */
         .card { 
             background: white; border-radius: 16px; padding: 20px 10px; 
             box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; 
-            width: 320px; margin: 0 auto;
+            width: fit-content; margin: 0 auto;
         }
         .title-input {
             border: none; background: transparent; font-size: 18px; font-weight: 700; text-align: center;
@@ -59,16 +58,11 @@
         const dateInput = document.getElementById('targetDate');
         const colorPicker = document.getElementById('colorPicker');
 
-        function applyColor(color) {
-            titleInput.style.color = color;
-            document.querySelectorAll('.time-box').forEach(box => box.style.backgroundColor = color);
-        }
-
-        // 주소창 업데이트 (사용자가 수동으로 노션에 다시 붙여넣기 위한 주소 생성)
+        // URL 파라미터 업데이트 (공유 및 개별 저장을 위함)
         function updateURL() {
-            const params = new URLSearchParams();
-            if (titleInput.value) params.set('t', titleInput.value);
-            if (dateInput.value) params.set('d', dateInput.value);
+            const params = new URLSearchParams(window.location.search);
+            params.set('t', titleInput.value);
+            params.set('d', dateInput.value);
             params.set('c', colorPicker.value.replace('#', ''));
             
             const newUrl = window.location.origin + window.location.pathname + '?' + params.toString();
@@ -76,38 +70,56 @@
             applyColor(colorPicker.value);
         }
 
-        // 주소창에서 데이터 읽기
-        function loadFromURL() {
+        function applyColor(color) {
+            titleInput.style.color = color;
+            document.querySelectorAll('.time-box').forEach(box => box.style.backgroundColor = color);
+        }
+
+        // 초기 데이터 로드 (URL에서 값을 읽어옴)
+        function loadData() {
             const params = new URLSearchParams(window.location.search);
             if (params.get('t')) titleInput.value = decodeURIComponent(params.get('t'));
             if (params.get('d')) dateInput.value = params.get('d');
             if (params.get('c')) {
-                colorPicker.value = '#' + params.get('c');
-                applyColor('#' + params.get('c'));
+                const color = '#' + params.get('c');
+                colorPicker.value = color;
+                applyColor(color);
             } else {
                 applyColor(colorPicker.value);
             }
         }
 
-        titleInput.addEventListener('input', updateURL);
-        dateInput.addEventListener('input', updateURL);
-        colorPicker.addEventListener('input', updateURL);
-
+        // 타이머 계산 로직 (오차 방지)
         function updateTimer() {
             if (!dateInput.value) return;
-            const diff = new Date(dateInput.value) - new Date();
+            
+            const now = new Date().getTime();
+            const target = new Date(dateInput.value).getTime();
+            const diff = target - now;
+
             if (diff <= 0) {
                 ["days","hours","minutes","seconds"].forEach(id => document.getElementById(id).innerText = "00");
                 return;
             }
-            const d = Math.floor(diff / 86400000);
-            const h = Math.floor((diff / 3600000) % 24);
-            const m = Math.floor((diff / 60000) % 60);
-            const s = Math.floor((diff / 1000) % 60);
+
+            const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((diff % (1000 * 60)) / 1000);
+
             document.getElementById("days").innerText = String(d).padStart(2, '0');
             document.getElementById("hours").innerText = String(h).padStart(2, '0');
             document.getElementById("minutes").innerText = String(m).padStart(2, '0');
             document.getElementById("seconds").innerText = String(s).padStart(2, '0');
         }
 
-        loadFromURL();
+        titleInput.addEventListener('input', updateURL);
+        dateInput.addEventListener('input', updateURL);
+        colorPicker.addEventListener('input', updateURL);
+
+        loadData();
+        setInterval(updateTimer, 1000);
+        updateTimer();
+    </script>
+</body>
+</html>
