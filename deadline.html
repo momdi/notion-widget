@@ -41,13 +41,11 @@
         }
 
         /* ✨ 애니메이션 클래스 추가 */
-        @keyframes jelly {
-    0% { transform: scale(1, 1); }
-    30% { transform: scale(1.25, 0.75); }
-    50% { transform: scale(0.75, 1.25); }
-    100% { transform: scale(1, 1); }
+        .number { 
+    font-size: 20px; font-weight: 700; display: inline-block;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-.pop { animation: jelly 0.4s both; }
+.pop { transform: scale(1.4) rotate(5deg); }
 
         .label { font-size: 8px; text-transform: uppercase; opacity: 0.8; font-weight: 600; }
 
