@@ -16,13 +16,14 @@
         }
         .title-input {
             border: none; background: transparent; font-size: 18px; font-weight: 700; text-align: center;
-            width: 100%; margin-bottom: 10px; outline: none; color: #37352f;
+            width: 100%; margin-bottom: 10px; outline: none; color: #191919;
         }
         .integrated-settings {
             background: #f4f4f4; border-radius: 8px; padding: 6px;
             margin-bottom: 20px; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
         }
         input[type="datetime-local"] { border: none; background: transparent; font-size: 11px; outline: none; cursor: pointer; color: #555;}
+        
         input[type="color"] {
             width: 10px !important; height: 10px !important; border: none; cursor: pointer; 
             background: none; border-radius: 50% !important; -webkit-appearance: none; padding: 0; flex-shrink: 0;
@@ -36,32 +37,36 @@
             width: 60px; height: 60px; display: flex; flex-direction: column; 
             justify-content: center; align-items: center; flex-shrink: 0;
             transition: background 0.3s;
-            background-color: #191919;
+            background-color: #191919; 
         }
-        .number { font-size: 20px; font-weight: 700; line-height: 1.1; margin-bottom: 2px; }
+
+        /* ✨ 애니메이션 클래스 추가 */
+        .number { 
+            font-size: 20px; font-weight: 700; line-height: 1.1; margin-bottom: 2px;
+            transition: all 0.2s ease-in-out;
+            display: inline-block;
+        }
+        .pop { transform: scale(1.15); opacity: 0.8; }
+
         .label { font-size: 8px; text-transform: uppercase; opacity: 0.8; font-weight: 600; }
 
-        /* 가이드 및 복사 섹션 (노션 임베드 시 숨김) */
         .guide-section {
             display: none; margin-top: 20px; padding-top: 20px; border-top: 1px dashed #eee;
             text-align: left; font-size: 12px; color: #666;
         }
         .guide-section h4 { margin: 0 0 10px 0; color: #333; font-size: 14px; }
-        .guide-section ul { padding-left: 18px; margin: 0; }
-        .guide-section li { margin-bottom: 6px; line-height: 1.5; }
+        .guide-section ul { padding-left: 0; list-style: none; margin: 0; }
+        .guide-section li { margin-bottom: 12px; line-height: 1.6; position: relative; padding-left: 15px; }
+        .guide-section li::before { content: "•"; position: absolute; left: 0; color: #2eaadc; }
 
         .copy-btn {
-            display: block; width: 100%; margin-top: 15px; padding: 10px; font-size: 13px; font-weight: 700;
+            display: block; width: 100%; margin-top: 15px; padding: 12px; font-size: 13px; font-weight: 700;
             background: #2eaadc; color: white; border: none; border-radius: 8px; cursor: pointer;
             transition: background 0.2s;
         }
         .copy-btn:hover { background: #258db5; }
+        .footer { margin-top: 20px; font-size: 11px; color: #aaa; text-align: center; }
 
-        .footer {
-            margin-top: 20px; font-size: 11px; color: #aaa; text-align: center;
-        }
-
-        /* 브라우저 직접 접속(큰 화면) 시에만 가이드 표시 */
         @media screen and (min-height: 400px) {
             .guide-visible { display: block; }
         }
@@ -72,7 +77,7 @@
         <input type="text" id="projectTitle" class="title-input" placeholder="제목을 입력하세요">
         <div class="integrated-settings">
             <input type="datetime-local" id="targetDate">
-            <input type="color" id="colorPicker" value="#222222">
+            <input type="color" id="colorPicker" value="#191919"> 
         </div>
         <div class="timer-container">
             <div class="time-box"><span class="number" id="days">00</span><span class="label">Days</span></div>
@@ -84,14 +89,12 @@
         <div id="guide" class="guide-section guide-visible">
             <h4>💡 사용 방법</h4>
             <ul>
-                <li>프로젝트 타이틀과 날짜를 입력한 후 <br><b>[링크 복사]</b> 버튼을 눌러주세요.</li>
-                <li>노션 페이지에 <b>'임베드'</b>로 링크를 붙여넣으면 </b><br>나만의 디데이 위젯이 설정됩니다.</li>
-                <li><b>새로운 위젯</b>을 만들고 싶으면 </b><br>타이틀을 새로 작성한 뒤 다시 링크를 복사해주세요.</li>
-                <li>이미 노션에 설치한 위젯은 노션 내에서<br><b>이름, 컬러 등을 언제든 변경할 수 있습니다.</li>
+                <li>프로젝트 타이틀과 날짜를 입력한 후<br><b>[링크 복사]</b> 버튼을 눌러주세요.</li>
+                <li>노션 페이지에 <b>'임베드'로 링크를 붙여넣으면</b><br>나만의 디데이 위젯이 설정됩니다.</li>
+                <li><b>새로운 위젯을 만들고 싶으면</b><br>타이틀을 새로 작성한 뒤 다시 링크를 복사해주세요.</li>
+                <li>이미 노션에 설치한 위젯은 노션 내에서<br><b>이름, 컬러 등을 언제든 변경</b>할 수 있습니다.</li>
             </ul>
-            
             <button id="copyBtn" class="copy-btn" onclick="copyLink()">🔗 노션 공유용 링크 복사</button>
-
             <div class="footer">
                 made by <b>momdi</b><br>
                 copyright momdi all rights reserved
@@ -123,9 +126,19 @@
             const params = new URLSearchParams(window.location.search);
             if (params.get('t')) titleInput.value = decodeURIComponent(params.get('t'));
             if (params.get('d')) dateInput.value = params.get('d');
-            const color = params.get('c') ? '#' + params.get('c') : '#222222';
+            const color = params.get('c') ? '#' + params.get('c') : '#191919';
             colorPicker.value = color;
             applyColor(color);
+        }
+
+        // ✨ 숫자 변경 시 애니메이션 효과를 주는 함수
+        function animateValue(id, newValue) {
+            const element = document.getElementById(id);
+            if (element.innerText !== newValue) {
+                element.innerText = newValue;
+                element.classList.add('pop');
+                setTimeout(() => element.classList.remove('pop'), 200);
+            }
         }
 
         function copyLink() {
@@ -146,26 +159,31 @@
             const now = new Date().getTime();
             const target = new Date(dateInput.value).getTime();
             const diff = target - now;
+
             if (diff <= 0) {
                 ["days","hours","minutes","seconds"].forEach(id => document.getElementById(id).innerText = "00");
                 return;
             }
-            document.getElementById("days").innerText = String(Math.floor(diff / 86400000)).padStart(2, '0');
-            document.getElementById("hours").innerText = String(Math.floor((diff % 86400000) / 3600000)).padStart(2, '0');
-            document.getElementById("minutes").innerText = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
-            document.getElementById("seconds").innerText = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+
+            const d = String(Math.floor(diff / 86400000)).padStart(2, '0');
+            const h = String(Math.floor((diff % 86400000) / 3600000)).padStart(2, '0');
+            const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
+            const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+
+            animateValue("days", d);
+            animateValue("hours", h);
+            animateValue("minutes", m);
+            animateValue("seconds", s);
         }
 
         titleInput.addEventListener('input', updateState);
         dateInput.addEventListener('input', updateState);
         colorPicker.addEventListener('input', updateState);
 
-        loadData(); // 기존 함수명 수정 loadFromURL로 호출
         loadFromURL();
         setInterval(updateTimer, 1000);
         updateTimer();
 
-        // 노션 임베드 시 가이드 영역 숨기기
         if (window.self !== window.top) {
             document.getElementById('guide').style.display = 'none';
         }
