@@ -14,7 +14,7 @@
             background: white; 
             border-radius: 12px; 
             /* 좌우 패딩을 4px로 극단적으로 줄여서 여백 제거 */
-            padding: 15px 4px; 
+            padding: 20px 10px; 
             box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
             text-align: center; 
             /* 박스 전체 가로 길이를 타이머(48px*4 + 간격)에 맞춰 220px 정도로 강제 제한 */
@@ -44,7 +44,7 @@
         .timer-container { 
             display: flex; 
             justify-content: center; 
-            gap: 3px; /* 간격을 4px에서 3px로 더 줄임 */
+            gap: 10px; /* 간격을 4px에서 3px로 더 줄임 */
             width: 100%;
         }
 
@@ -68,7 +68,7 @@
         <input type="text" id="projectTitle" class="title-input" placeholder="Untitled">
         <div class="integrated-settings">
             <input type="datetime-local" id="targetDate">
-            <input type="color" id="colorPicker" value="#222222" style="width:16px; height:16px; border:none; cursor:pointer; background:none; padding:0; vertical-align:middle;">
+            <input type="color" id="colorPicker" value="#222222" style="width:10px; height:10px; border:none; cursor:pointer; background:none; border-radius:50%; -webkit-appearance:none;">
         </div>
         <div class="timer-container">
             <div class="time-box"><span class="number" id="days">00</span><span class="label">Days</span></div>
