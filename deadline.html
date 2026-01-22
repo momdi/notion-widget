@@ -41,12 +41,13 @@
         }
 
         /* ✨ 애니메이션 클래스 추가 */
-        .number { 
-            font-size: 20px; font-weight: 700; line-height: 1.1; margin-bottom: 2px;
-            transition: all 0.2s ease-in-out;
-            display: inline-block;
-        }
-        .pop { transform: scale(1.15); opacity: 0.8; }
+        @keyframes jelly {
+    0% { transform: scale(1, 1); }
+    30% { transform: scale(1.25, 0.75); }
+    50% { transform: scale(0.75, 1.25); }
+    100% { transform: scale(1, 1); }
+}
+.pop { animation: jelly 0.4s both; }
 
         .label { font-size: 8px; text-transform: uppercase; opacity: 0.8; font-weight: 600; }
 
@@ -133,13 +134,15 @@
 
         // ✨ 숫자 변경 시 애니메이션 효과를 주는 함수
         function animateValue(id, newValue) {
-            const element = document.getElementById(id);
-            if (element.innerText !== newValue) {
-                element.innerText = newValue;
-                element.classList.add('pop');
-                setTimeout(() => element.classList.remove('pop'), 200);
-            }
-        }
+    const element = document.getElementById(id);
+    if (element.innerText !== newValue) {
+        element.innerText = newValue;
+        element.classList.remove('pop'); // 초기화 후 다시 추가
+        void element.offsetWidth; // 리플로우 강제 (애니메이션 재시작용)
+        element.classList.add('pop');
+        setTimeout(() => element.classList.remove('pop'), 300); // 알트별 시간에 맞춰 조절
+    }
+}
 
         function copyLink() {
             const url = window.location.href;
