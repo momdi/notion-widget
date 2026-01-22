@@ -2,128 +2,38 @@
 <html>
 <head>
     <style>
-        body { background: transparent; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: -apple-system, sans-serif; }
+        /* 1. 노션 기본 폰트 시스템 적용 */
+        body { 
+            background: transparent; 
+            display: flex; justify-content: center; align-items: center; 
+            height: 100vh; margin: 0; 
+            font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol";
+        }
+
         .card { background: white; border-radius: 20px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; width: fit-content; }
         
-        /* 프로젝트 타이틀 입력창 */
         .title-input {
-            border: none; background: transparent; font-size: 18px; font-weight: 800; text-align: center;
-            width: 100%; margin-bottom: 15px; outline: none; transition: color 0.3s ease;
+            border: none; background: transparent; font-size: 19px; font-weight: 700; text-align: center;
+            width: 100%; margin-bottom: 12px; outline: none; transition: color 0.3s ease;
+            font-family: inherit;
         }
-        .title-input::placeholder { color: #ccc; font-weight: 400; }
+        .title-input::placeholder { color: #ccc; }
 
-        /* 설정 영역 */
-        .settings-group { margin-bottom: 20px; display: flex; gap: 10px; justify-content: center; align-items: center; }
+        /* 설정 영역 스타일링 */
+        .settings-group { 
+            margin-bottom: 22px; display: flex; gap: 8px; justify-content: center; align-items: center; 
+            position: relative;
+        }
         
+        /* 2. 날짜 입력창: 배경 지우고 텍스트만 깔끔하게 */
         input[type="datetime-local"] { 
-            border: none; background: #f4f4f4; border-radius: 8px; padding: 8px 12px; font-size: 13px; outline: none; font-weight: 600; cursor: pointer;
+            border: none; background: transparent; padding: 5px; font-size: 14px; outline: none; 
+            font-weight: 500; cursor: pointer; font-family: inherit;
         }
 
-        .color-wrapper {
-            width: 28px; height: 28px; border-radius: 50%; overflow: hidden; border: 2px solid #eee;
-            display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s;
-        }
-        .color-wrapper:hover { transform: scale(1.1); }
-        input[type="color"] { border: none; width: 50px; height: 50px; cursor: pointer; background: none; padding: 0; transform: scale(2); }
-        
-        /* 타이머 디자인 */
-        .timer-container { display: flex; justify-content: center; gap: 10px; }
-        .time-box { 
-            background: #111; color: white; border-radius: 12px; padding: 15px 12px; min-width: 55px; 
-            transition: background 0.3s ease; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        /* 3. 캘린더 아이콘 내부에 색상 피커 숨기기 */
+        .color-picker-container {
+            position: relative; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
         }
 
-        .number { font-size: 26px; font-weight: 800; display: block; line-height: 1; margin-bottom: 5px; }
-        .label { font-size: 9px; text-transform: uppercase; opacity: 0.8; font-weight: bold; }
-
-        @keyframes slideDown { 0% { transform: translateY(-5px); opacity: 0.7; } 100% { transform: translateY(0); opacity: 1; } }
-        .animate { animation: slideDown 0.2s ease-out; }
-    </style>
-</head>
-<body>
-
-    <div class="card">
-        <input type="text" id="projectTitle" class="title-input" placeholder="프로젝트 명을 입력하세요" oninput="saveData()">
-
-        <div class="settings-group">
-            <input type="datetime-local" id="targetDate" onchange="saveData()">
-            <div class="color-wrapper">
-                <input type="color" id="colorPicker" value="#111111" onchange="saveData()">
-            </div>
-        </div>
-
-        <div class="timer-container">
-            <div class="time-box"><span class="number" id="days">00</span><span class="label">Days</span></div>
-            <div class="time-box"><span class="number" id="hours">00</span><span class="label">Hours</span></div>
-            <div class="time-box"><span class="number" id="minutes">00</span><span class="label">Min</span></div>
-            <div class="time-box"><span class="number" id="seconds">00</span><span class="label">Sec</span></div>
-        </div>
-    </div>
-
-    <script>
-        const titleInput = document.getElementById('projectTitle');
-        const dateInput = document.getElementById('targetDate');
-        const colorPicker = document.getElementById('colorPicker');
-
-        // 저장된 데이터 불러오기
-        const savedTitle = localStorage.getItem('projectTitle');
-        const savedDate = localStorage.getItem('deadline');
-        const savedColor = localStorage.getItem('pointColor');
-
-        if (savedTitle) titleInput.value = savedTitle;
-        if (savedDate) dateInput.value = savedDate;
-        if (savedColor) {
-            colorPicker.value = savedColor;
-            applyColor(savedColor);
-        } else {
-            applyColor("#111111");
-        }
-
-        function saveData() {
-            localStorage.setItem('projectTitle', titleInput.value);
-            localStorage.setItem('deadline', dateInput.value);
-            localStorage.setItem('pointColor', colorPicker.value);
-            applyColor(colorPicker.value);
-        }
-
-        function applyColor(color) {
-            const boxes = document.querySelectorAll('.time-box');
-            boxes.forEach(box => box.style.backgroundColor = color);
-            dateInput.style.color = color;
-            titleInput.style.color = color; // 타이틀 색상도 포인트 컬러로!
-        }
-
-        function updateTimer() {
-            const target = dateInput.value;
-            if (!target) return;
-            const diff = new Date(target) - new Date();
-            if (diff <= 0) {
-                ["days","hours","minutes","seconds"].forEach(id => document.getElementById(id).innerText = "00");
-                return;
-            }
-            const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-            const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
-            const m = Math.floor((diff / (1000 * 60)) % 60);
-            const s = Math.floor((diff / 1000) % 60);
-            updateElement("days", d);
-            updateElement("hours", h);
-            updateElement("minutes", m);
-            updateElement("seconds", s);
-        }
-
-        function updateElement(id, value) {
-            const el = document.getElementById(id);
-            const newVal = String(value).padStart(2, '0');
-            if (el.innerText !== newVal) {
-                el.innerText = newVal;
-                el.classList.remove("animate");
-                void el.offsetWidth;
-                el.classList.add("animate");
-            }
-        }
-
-        setInterval(updateTimer, 1000);
-        updateTimer();
-    </script>
-</body>
-</html>
+        input[type
