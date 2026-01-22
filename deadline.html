@@ -13,24 +13,17 @@
             background: white; border-radius: 16px; padding: 20px 10px; 
             box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; 
             width: 320px; margin: 20px auto;
-            position: relative; /* + 아이콘 배치를 위해 추가 */
+            position: relative; /* 아이콘 배치를 위해 추가 */
         }
-
+        
         /* ✨ 우측 상단 + 아이콘 스타일 */
-        .add-btn {
-            position: absolute;
-            top: 12px;
-            right: 15px;
-            text-decoration: none;
-            color: #d3d3d3; /* 연한 그레이 */
-            font-size: 20px;
-            font-weight: 300;
-            line-height: 1;
-            transition: color 0.2s;
+        .add-link {
+            position: absolute; top: 12px; right: 15px;
+            text-decoration: none; color: #e0e0e0; /* 연한 그레이 */
+            font-size: 20px; font-weight: 300; line-height: 1;
+            transition: color 0.2s ease;
         }
-        .add-btn:hover {
-            color: #a0a0a0; /* 호버 시 약간 진하게 */
-        }
+        .add-link:hover { color: #bdbdbd; } /* 호버 시 약간 진하게 */
 
         .title-input {
             border: none; background: transparent; font-size: 18px; font-weight: 700; text-align: center;
@@ -99,7 +92,7 @@
 </head>
 <body>
     <div class="card">
-        <a href="https://momdi.github.io/notion-widget/deadline.html" target="_top" class="add-btn" title="새 위젯 만들기">+</a>
+        <a href="https://momdi.github.io/notion-widget/deadline.html" target="_top" class="add-link" title="새 위젯 만들기">+</a>
 
         <input type="text" id="projectTitle" class="title-input" placeholder="제목을 입력하세요">
         <div class="integrated-settings">
@@ -163,7 +156,7 @@
             if (element.innerText !== newValue) {
                 element.innerText = newValue;
                 element.classList.remove('pop');
-                void element.offsetWidth; // 애니메이션 리셋
+                void element.offsetWidth;
                 element.classList.add('pop');
                 setTimeout(() => element.classList.remove('pop'), 200);
             }
