@@ -13,7 +13,25 @@
             background: white; border-radius: 16px; padding: 20px 10px; 
             box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; 
             width: 320px; margin: 20px auto;
+            position: relative; /* + 아이콘 배치를 위해 추가 */
         }
+
+        /* ✨ 우측 상단 + 아이콘 스타일 */
+        .add-btn {
+            position: absolute;
+            top: 12px;
+            right: 15px;
+            text-decoration: none;
+            color: #d3d3d3; /* 연한 그레이 */
+            font-size: 20px;
+            font-weight: 300;
+            line-height: 1;
+            transition: color 0.2s;
+        }
+        .add-btn:hover {
+            color: #a0a0a0; /* 호버 시 약간 진하게 */
+        }
+
         .title-input {
             border: none; background: transparent; font-size: 18px; font-weight: 700; text-align: center;
             width: 100%; margin-bottom: 10px; outline: none; color: #191919;
@@ -40,21 +58,20 @@
             background-color: #191919; 
         }
 
-        /* ✨ 애니메이션 클래스 추가 */
         @keyframes jelly {
-    0% { transform: scale(1, 1); }
-    30% { transform: scale(1.15, 0.85); }
-    50% { transform: scale(0.85, 1.15); }
-    100% { transform: scale(1, 1); }
-}
+            0% { transform: scale(1, 1); }
+            30% { transform: scale(1.15, 0.85); }
+            50% { transform: scale(0.85, 1.15); }
+            100% { transform: scale(1, 1); }
+        }
 
-.number { 
-    font-size: 30px; font-weight: 700; line-height: 1; margin-bottom: 4px;
-    display: inline-block;
-    will-change: transform;
-}
+        .number { 
+            font-size: 30px; font-weight: 700; line-height: 1; margin-bottom: 4px;
+            display: inline-block;
+            will-change: transform;
+        }
 
-.pop { animation: jelly 0.2s both; }
+        .pop { animation: jelly 0.2s both; }
 
         .label { font-size: 8px; text-transform: uppercase; opacity: 0.8; font-weight: 600; }
 
@@ -82,6 +99,8 @@
 </head>
 <body>
     <div class="card">
+        <a href="https://momdi.github.io/notion-widget/deadline.html" target="_top" class="add-btn" title="새 위젯 만들기">+</a>
+
         <input type="text" id="projectTitle" class="title-input" placeholder="제목을 입력하세요">
         <div class="integrated-settings">
             <input type="datetime-local" id="targetDate">
@@ -139,17 +158,16 @@
             applyColor(color);
         }
 
-        // ✨ 숫자 변경 시 애니메이션 효과를 주는 함수
         function animateValue(id, newValue) {
-    const element = document.getElementById(id);
-    if (element.innerText !== newValue) {
-        element.innerText = newValue;
-        element.classList.remove('pop');
-        void element.offsetWidth; // 애니메이션 리셋을 위한 코드
-        element.classList.add('pop');
-        setTimeout(() => element.classList.remove('pop'), 200); // 0.2초 후 클래스 제거
-    }
-}
+            const element = document.getElementById(id);
+            if (element.innerText !== newValue) {
+                element.innerText = newValue;
+                element.classList.remove('pop');
+                void element.offsetWidth; // 애니메이션 리셋
+                element.classList.add('pop');
+                setTimeout(() => element.classList.remove('pop'), 200);
+            }
+        }
 
         function copyLink() {
             const url = window.location.href;
