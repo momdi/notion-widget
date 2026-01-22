@@ -39,15 +39,21 @@
         .number { font-size: 20px; font-weight: 700; line-height: 1.1; margin-bottom: 2px; }
         .label { font-size: 8px; text-transform: uppercase; opacity: 0.8; font-weight: 600; }
 
-        /* 링크 복사 버튼 (브라우저에서만 보임) */
         .copy-btn {
-            display: none;
-            margin-top: 15px; padding: 8px 16px; font-size: 12px; font-weight: 600;
+            display: none; margin-top: 15px; padding: 8px 16px; font-size: 12px; font-weight: 600;
             background: #2eaadc; color: white; border: none; border-radius: 6px; cursor: pointer;
         }
-        /* iframe이 아닐 때(직접 열었을 때)만 버튼 표시 */
-        @media screen and (min-height: 200px) {
+
+        /* 저작권 문구 스타일 */
+        .footer {
+            display: none; margin-top: 20px; font-size: 11px; color: #aaa; line-height: 1.5;
+        }
+        .footer b { color: #888; }
+
+        /* 브라우저 직접 접속 시에만 보일 요소들 */
+        @media screen and (min-height: 250px) {
             .show-in-browser { display: inline-block; }
+            .footer-visible { display: block; }
         }
     </style>
 </head>
@@ -64,7 +70,13 @@
             <div class="time-box"><span class="number" id="minutes">00</span><span class="label">Min</span></div>
             <div class="time-box"><span class="number" id="seconds">00</span><span class="label">Sec</span></div>
         </div>
+        
         <button id="copyBtn" class="copy-btn show-in-browser" onclick="copyLink()">🔗 노션 공유용 링크 복사</button>
+
+        <div id="footer" class="footer footer-visible">
+            made by <b>momdi</b><br>
+            copyright momdi all rights reserved
+        </div>
     </div>
 
     <script>
@@ -77,24 +89,20 @@
             document.querySelectorAll('.time-box').forEach(box => box.style.backgroundColor = color);
         }
 
-        // 입력할 때마다 현재 주소창의 URL만 바꿈 (저장소 사용 X)
         function updateState() {
             const params = new URLSearchParams();
             params.set('t', encodeURIComponent(titleInput.value));
             params.set('d', dateInput.value);
             params.set('c', colorPicker.value.replace('#', ''));
-            
             const newUrl = window.location.origin + window.location.pathname + '?' + params.toString();
             window.history.replaceState({}, '', newUrl);
             applyColor(colorPicker.value);
         }
 
-        // 오직 URL에 있는 정보만 가져옴 (LocalStorage 확인 코드 삭제됨)
         function loadFromURL() {
             const params = new URLSearchParams(window.location.search);
             if (params.get('t')) titleInput.value = decodeURIComponent(params.get('t'));
             if (params.get('d')) dateInput.value = params.get('d');
-            
             const color = params.get('c') ? '#' + params.get('c') : '#222222';
             colorPicker.value = color;
             applyColor(color);
@@ -114,7 +122,6 @@
             const now = new Date().getTime();
             const target = new Date(dateInput.value).getTime();
             const diff = target - now;
-
             if (diff <= 0) {
                 ["days","hours","minutes","seconds"].forEach(id => document.getElementById(id).innerText = "00");
                 return;
@@ -133,11 +140,10 @@
         setInterval(updateTimer, 1000);
         updateTimer();
 
-        // 노션 임베드 환경 감지: 임베드 상태면 버튼을 아예 지워버림
+        // 노션 임베드 시 버튼과 푸터 숨기기
         if (window.self !== window.top) {
             document.getElementById('copyBtn').style.display = 'none';
-        } else {
-            document.getElementById('copyBtn').style.display = 'inline-block';
+            document.getElementById('footer').style.display = 'none';
         }
     </script>
 </body>
