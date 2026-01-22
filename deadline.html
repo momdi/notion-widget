@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { background: transparent; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: -apple-system, sans-serif; }
+        .card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; border: 1px solid #eee; width: fit-content; }
+        .title { font-size: 14px; font-weight: 600; color: #666; margin-bottom: 15px; }
+        .timer-container { display: flex; justify-content: center; gap: 8px; }
+        .time-box { background: #111; color: white; border-radius: 10px; padding: 12px 15px; min-width: 50px; }
+        .number { font-size: 24px; font-weight: 800; display: block; line-height: 1; }
+        .label { font-size: 9px; text-transform: uppercase; color: #888; margin-top: 6px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="title">Project Deadline</div>
+        <div class="timer-container">
+            <div class="time-box">
+                <span class="number" id="days">00</span>
+                <span class="label">Days</span>
+            </div>
+            <div class="time-box">
+                <span class="number" id="hours">00</span>
+                <span class="label">Hours</span>
+            </div>
+            <div class="time-box">
+                <span class="number" id="minutes">00</span>
+                <span class="label">Minutes</span>
+            </div>
+        </div>
+    </div>
+    <script>
+        // 목표 날짜: 2026년 12월 31일 (월은 0부터 시작하므로 11이 12월입니다)
+        const deadline = new Date(2026, 11, 31, 23, 59, 59); 
+
+        function updateTimer() {
+            const now = new Date();
+            const diff = deadline - now;
+            if (diff <= 0) {
+                document.querySelector(".timer-container").innerHTML = "<b>기한 종료</b>";
+                return;
+            }
+            const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+            const m = Math.floor((diff / (1000 * 60)) % 60);
+            document.getElementById("days").innerText = String(d).padStart(2, '0');
+            document.getElementById("hours").innerText = String(h).padStart(2, '0');
+            document.getElementById("minutes").innerText = String(m).padStart(2, '0');
+        }
+        setInterval(updateTimer, 60000);
+        updateTimer();
+    </script>
+</body>
+</html>
