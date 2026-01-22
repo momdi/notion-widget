@@ -14,13 +14,13 @@
             background: white; 
             border-radius: 24px; 
             /* 좌우 0px로 설정하여 불필요한 넓이 제거 */
-            padding: 20px 0px; 
-            box-shadow: 0 10px 20px rgba(0,0,0,0.06); 
+            padding: 50px 0px; 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.06); 
             text-align: center; 
-            width: 350px;
+            width: fit-content;
             margin: 0 auto;
-        
-        
+            /* 내부 요소들이 밖으로 나가지 않게 함 */
+            display: inline-block;
         }
         
         .title-input {
@@ -45,8 +45,8 @@
         
         input[type="color"] {
             /* 가로세로 비율 강제 고정 */
-            width: 10px !important; 
-            height: 10px !important; 
+            width: 20px !important; 
+            height: 20px !important; 
             border: none; cursor: pointer; 
             background: none; border-radius: 50%; -webkit-appearance: none;
             padding: 0;
