@@ -17,7 +17,6 @@
             z-index: 1;
         }
 
-        /* ✨ + 아이콘: 새 창 열기 및 굵기 설정 */
         .add-btn {
             position: absolute;
             top: 15px;
@@ -25,7 +24,7 @@
             text-decoration: none;
             color: #d3d3d3;
             font-size: 22px;
-            font-weight: 100; /* 굵게 원하시면 500~700으로 변경 */
+            font-weight: 100;
             line-height: 1;
             transition: color 0.2s;
             z-index: 100; 
@@ -84,6 +83,7 @@
         .guide-section {
             margin-top: 20px; padding-top: 20px; border-top: 1px dashed #eee;
             text-align: left; font-size: 12px; color: #666;
+            display: block; /* 기본적으로 보이게 설정 */
         }
         
         .hidden { display: none !important; }
@@ -93,7 +93,6 @@
         .guide-section li { margin-bottom: 12px; line-height: 1.6; position: relative; padding-left: 15px; }
         .guide-section li::before { content: "•"; position: absolute; left: 0; color: #2eaadc; }
 
-        /* ✨ 맘디 링크: 버튼 아래, 푸터 위 간격 조정 */
         .about-link {
             display: block; 
             text-align: center; 
@@ -143,7 +142,7 @@
             <button id="copyBtn" class="copy-btn" onclick="copyLink()">🔗 노션 공유용 링크 복사</button>
 
             <a href="https://link.inpock.co.kr/momdi" target="_blank" class="about-link">
-                🏠 더 많은 템플릿 보러가기
+                🏠 맘디의 다양한 위젯이 궁금하다면?
             </a>
 
             <div class="footer">
@@ -183,10 +182,10 @@
             colorPicker.value = color;
             applyColor(color);
 
-            if (params.get('t') || params.get('d')) {
+            // ✨ 수정된 로직: 아이프레임(노션 임베드) 안에서만 가이드를 숨깁니다.
+            // 웹 브라우저 주소창으로 직접 보고 있을 때는 데이터가 있어도 가이드를 유지합니다.
+            if (window.self !== window.top && (params.get('t') || params.get('d'))) {
                 guideSection.classList.add('hidden');
-            } else {
-                guideSection.classList.remove('hidden');
             }
         }
 
