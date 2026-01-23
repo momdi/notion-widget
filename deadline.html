@@ -36,9 +36,28 @@
         input[type="datetime-local"] { border: none; background: transparent; font-size: 11px; outline: none; cursor: pointer; color: #555;}
         
         input[type="color"] {
-            width: 10px !important; height: 10px !important; border: none; cursor: pointer; 
-            background: none; border-radius: 50% !important; -webkit-appearance: none; padding: 0; flex-shrink: 0;
-        }
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 10px !important;    /* 너비를 충분히 확보 */
+    height: 10px !important;   /* 높이를 너비와 동일하게 */
+    border: none;
+    cursor: pointer;
+    background: none;
+    padding: 0;
+    margin: 0;
+    flex-shrink: 0;            /* 주변 요소에 의해 눌리지 않도록 설정 */
+}
+
+input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+
+input[type="color"]::-webkit-color-swatch {
+    border: none;
+    border-radius: 50%;        /* 완벽한 원형으로 만듦 */
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1); /* 테두리가 너무 흐릿하면 살짝 선 추가 */
+}
 
         .timer-container { display: flex; justify-content: center; gap: 6px; padding: 0 20px; } /* 상단 박스 여백 고정 */
         .time-box { 
