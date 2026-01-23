@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>맘디 디데이 위젯</title>
     <style>
         body { 
             background: transparent; display: flex; justify-content: center; align-items: center; 
@@ -10,77 +11,74 @@
             font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
         }
         .card { 
-            background: white; border-radius: 16px; padding: 25px 0 20px; /* 좌우 패딩을 0으로 하고 내부에서 조절 */
+            background: white; border-radius: 16px; padding: 25px 0 20px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; 
             width: 320px; margin: 20px auto;
-            position: relative;
-            z-index: 1;
+            position: relative; z-index: 1;
         }
-
+        
+        /* 우측 상단 새 위젯 버튼 */
         .add-btn {
             position: absolute; top: 15px; right: 18px; text-decoration: none;
             color: #d3d3d3; font-size: 22px; font-weight: 100; line-height: 1;
             transition: color 0.2s; z-index: 100; display: flex;
             justify-content: center; align-items: center; width: 30px; height: 30px; cursor: pointer;
         }
+        .add-btn:hover { color: #2eaadc; }
 
         .title-input {
             border: none; background: transparent; font-size: 18px; font-weight: 700; text-align: center;
             width: 80%; margin: 0 auto 10px; outline: none; color: #191919;
             display: block; position: relative; z-index: 2;
         }
+        
+        /* 설정창 영역 */
         .integrated-settings {
             background: #f4f4f4; border-radius: 8px; padding: 6px;
             margin-bottom: 20px; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
         }
         input[type="datetime-local"] { border: none; background: transparent; font-size: 11px; outline: none; cursor: pointer; color: #555;}
         
+        /* 컬러피커 원형 스타일 */
         input[type="color"] {
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    width: 10px !important;    /* 너비를 충분히 확보 */
-    height: 10px !important;   /* 높이를 너비와 동일하게 */
-    border: none;
-    cursor: pointer;
-    background: none;
-    padding: 0;
-    margin: 0;
-    flex-shrink: 0;            /* 주변 요소에 의해 눌리지 않도록 설정 */
-}
+            -webkit-appearance: none; -moz-appearance: none; appearance: none;
+            width: 18px !important; height: 18px !important;
+            border: none; cursor: pointer; background: none; padding: 0; margin: 0; flex-shrink: 0;
+        }
+        input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+        input[type="color"]::-webkit-color-swatch { border: none; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1); }
 
-input[type="color"]::-webkit-color-swatch-wrapper {
-    padding: 0;
-}
-
-input[type="color"]::-webkit-color-swatch {
-    border: none;
-    border-radius: 50%;        /* 완벽한 원형으로 만듦 */
-    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1); /* 테두리가 너무 흐릿하면 살짝 선 추가 */
-}
-
-        .timer-container { display: flex; justify-content: center; gap: 6px; padding: 0 20px; } /* 상단 박스 여백 고정 */
+        /* 타이머 영역 */
+        .timer-container { display: flex; justify-content: center; gap: 6px; padding: 0 20px; }
         .time-box { 
             color: white; border-radius: 12px; padding: 12px 0;
             width: 60px; height: 50px; display: flex; flex-direction: column; 
             justify-content: center; align-items: center; flex-shrink: 0;
-            background-color: #2eaadc; 
-        }
-
-        .number { font-size: 30px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
-        .label { font-size: 8px; text-transform: uppercase; opacity: 0.8; font-weight: 600; }
-
-        /* ✨ 하단 가이드 섹션 여백 수정 */
-        .guide-section {
-            margin-top: 25px; 
-            padding: 20px 25px 0; /* 좌우 여백을 상단 박스 라인에 맞춰 넓힘 */
-            border-top: 1px dashed #eee;
-            text-align: left; 
-            font-size: 12px; 
-            color: #666;
-            display: block;
+            background-color: #2eaadc; /* 기본 색상 */
+            transition: background 0.3s ease;
         }
         
+        .number { 
+            font-size: 30px; font-weight: 700; line-height: 1; margin-bottom: 4px; 
+            display: inline-block;
+        }
+        .label { font-size: 8px; text-transform: uppercase; opacity: 0.8; font-weight: 600; }
+
+        /* 젤리 애니메이션 */
+        @keyframes jelly {
+            0% { transform: scale(1, 1); }
+            30% { transform: scale(1.15, 0.85); }
+            50% { transform: scale(0.85, 1.15); }
+            100% { transform: scale(1, 1); }
+        }
+        .pop { animation: jelly 0.3s ease-in-out; }
+
+        /* 하단 가이드 영역 (다단 배치를 위한 여백 조정) */
+        .guide-section {
+            margin-top: 25px; padding: 20px 25px 0;
+            border-top: 1px dashed #eee; text-align: left; font-size: 12px; color: #666; 
+            display: block; 
+        }
         .hidden { display: none !important; }
 
         .guide-section h4 { margin: 0 0 10px 0; color: #333; font-size: 14px; }
@@ -88,111 +86,117 @@ input[type="color"]::-webkit-color-swatch {
         .guide-section li { margin-bottom: 12px; line-height: 1.6; position: relative; padding-left: 15px; }
         .guide-section li::before { content: "•"; position: absolute; left: 0; color: #2eaadc; }
 
+        /* 맘디 링크 & 호버 효과 */
         .about-link {
-    display: block; 
-    text-align: center; 
-    margin-top: 20px; 
-    margin-bottom: -10px; 
-    font-size: 11px;
-    color: #aaa; /* 기본 색상: 흐린 회색 */
-    text-decoration: none; 
-    transition: color 0.3s ease; /* 색상이 부드럽게 변하도록 애니메이션 추가 */
-    font-weight: 600;
-}
+            display: block; text-align: center; margin-top: 20px; margin-bottom: -10px; 
+            font-size: 11px; color: #aaa; text-decoration: none; transition: color 0.3s ease; font-weight: 600;
+        }
+        .about-link:hover { color: #2eaadc; text-decoration: underline; }
 
-/* ✨ 마우스를 올렸을 때 색상 변경 */
-.about-link:hover { 
-    color: #2eaadc; /* 맘디 시그니처 하늘색으로 변경 */
-    text-decoration: underline; /* 밑줄을 생기게 해서 클릭 가능한 링크임을 강조 */
-}
-
-        /* ✨ 버튼 너비를 가이드 섹션 안쪽 여백에 맞게 100%로 설정 */
+        /* 복사 버튼 */
         .copy-btn {
             display: block; width: 100%; margin-top: 5px; padding: 12px; font-size: 13px; font-weight: 700;
             background: #2eaadc; color: white; border: none; border-radius: 8px; cursor: pointer;
+            transition: background 0.2s;
         }
+        
         .footer { margin-top: 20px; font-size: 11px; color: #aaa; text-align: center; }
     </style>
 </head>
 <body>
     <div class="card">
-        <a href="https://momdi.github.io/notion-widget/deadline.html" target="_blank" class="add-btn">+</a>
-
+        <a href="https://momdi.github.io/notion-widget/deadline.html" target="_blank" class="add-btn" title="새 위젯 만들기">+</a>
+        
         <input type="text" id="projectTitle" class="title-input" placeholder="제목을 입력하세요">
+        
         <div class="integrated-settings">
             <input type="datetime-local" id="targetDate">
             <input type="color" id="colorPicker" value="#2eaadc"> 
         </div>
+
         <div class="timer-container">
             <div class="time-box"><span class="number" id="days">00</span><span class="label">Days</span></div>
             <div class="time-box"><span class="number" id="hours">00</span><span class="label">Hours</span></div>
             <div class="time-box"><span class="number" id="minutes">00</span><span class="label">Min</span></div>
             <div class="time-box"><span class="number" id="seconds">00</span><span class="label">Sec</span></div>
         </div>
-        
+
         <div id="guide" class="guide-section">
             <h4>💡 사용 방법</h4>
             <ul>
                 <li>프로젝트 타이틀과 날짜를 입력한 후<br><b>[링크 복사]</b> 버튼을 눌러주세요.</li>
                 <li>노션 페이지에 <b>'임베드'로 링크를 붙여넣으면</b><br>나만의 디데이 위젯이 설정됩니다.</li>
-                <li><b>새로운 위젯을 만들고 싶으면</b><br>타이틀을 새로 작성한 뒤 다시 링크를 복사해주세요.</li>
+                <li><b>새로운 위젯을 만들고 싶으면</b><br>상단의 <b>+ 버튼</b>을 눌러 다시 작성해주세요.</li>
             </ul>
 
             <button id="copyBtn" class="copy-btn" onclick="copyLink()">🔗 노션 공유용 링크 복사</button>
 
-            <a href="https://litt.ly/momdi" target="_blank" class="about-link">
-                🏠 맘디의 다양한 위젯이 궁금하다면?
-            </a>
+            <a href="https://litt.ly/momdi" target="_blank" class="about-link">🏠 맘디의 다양한 위젯이 궁금하다면?</a>
 
             <div class="footer">
                 Copyright 2026. <b>momdi</b> All rights reserved.
             </div>
         </div>
     </div>
+
     <script>
         const titleInput = document.getElementById('projectTitle');
         const dateInput = document.getElementById('targetDate');
         const colorPicker = document.getElementById('colorPicker');
         const guideSection = document.getElementById('guide');
 
+        // 색상 적용 함수 (안전하게 # 체크)
         function applyColor(color) {
-            titleInput.style.color = color;
-            document.querySelectorAll('.time-box').forEach(box => box.style.backgroundColor = color);
+            const validColor = color.startsWith('#') ? color : '#' + color;
+            titleInput.style.color = validColor;
+            document.querySelectorAll('.time-box').forEach(box => {
+                box.style.backgroundColor = validColor;
+            });
         }
 
+        // 상태 업데이트 및 URL 반영
         function updateState() {
             const params = new URLSearchParams();
             params.set('t', encodeURIComponent(titleInput.value));
             params.set('d', dateInput.value);
             params.set('c', colorPicker.value.replace('#', ''));
+            
             const newUrl = window.location.origin + window.location.pathname + '?' + params.toString();
             window.history.replaceState({}, '', newUrl);
             applyColor(colorPicker.value);
         }
 
+        // URL에서 데이터 불러오기
         function loadFromURL() {
             const params = new URLSearchParams(window.location.search);
             if (params.get('t')) titleInput.value = decodeURIComponent(params.get('t'));
             if (params.get('d')) dateInput.value = params.get('d');
-            const color = params.get('c') ? '#' + params.get('c') : '#2eaadc';
-            colorPicker.value = color;
-            applyColor(color);
+            
+            // 기본 색상은 #2eaadc로 설정
+            const colorParam = params.get('c');
+            const color = colorParam ? '#' + colorParam : '#2eaadc';
+            
+            colorPicker.value = color.length === 7 ? color : '#2eaadc';
+            applyColor(colorPicker.value);
+
+            // 노션 임베드 시 가이드 숨김 (직접 접속 시에는 보임)
             if (window.self !== window.top && (params.get('t') || params.get('d'))) {
                 guideSection.classList.add('hidden');
             }
         }
 
+        // 숫자 변경 시 애니메이션 효과
         function animateValue(id, newValue) {
             const element = document.getElementById(id);
             if (element.innerText !== newValue) {
                 element.innerText = newValue;
                 element.classList.remove('pop');
-                void element.offsetWidth;
+                void element.offsetWidth; // 리플로우 강제 발생
                 element.classList.add('pop');
-                setTimeout(() => element.classList.remove('pop'), 200);
             }
         }
 
+        // 링크 복사 함수
         function copyLink() {
             const url = window.location.href;
             navigator.clipboard.writeText(url).then(() => {
@@ -206,28 +210,37 @@ input[type="color"]::-webkit-color-swatch {
             });
         }
 
+        // 타이머 업데이트
         function updateTimer() {
             if (!dateInput.value) return;
             const now = new Date().getTime();
             const target = new Date(dateInput.value).getTime();
             const diff = target - now;
+
             if (diff <= 0) {
-                ["days","hours","minutes","seconds"].forEach(id => document.getElementById(id).innerText = "00");
+                ["days","hours","minutes","seconds"].forEach(id => {
+                    document.getElementById(id).innerText = "00";
+                });
                 return;
             }
+
             const d = String(Math.floor(diff / 86400000)).padStart(2, '0');
             const h = String(Math.floor((diff % 86400000) / 3600000)).padStart(2, '0');
             const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
             const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+
             animateValue("days", d);
             animateValue("hours", h);
             animateValue("minutes", m);
             animateValue("seconds", s);
         }
 
+        // 이벤트 리스너
         titleInput.addEventListener('input', updateState);
         dateInput.addEventListener('input', updateState);
         colorPicker.addEventListener('input', updateState);
+
+        // 초기화
         loadFromURL();
         setInterval(updateTimer, 1000);
         updateTimer();
