@@ -10,7 +10,7 @@
             font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
         }
         .card { 
-            background: white; border-radius: 16px; padding: 25px 10px 20px; 
+            background: white; border-radius: 16px; padding: 25px 0 20px; /* 좌우 패딩을 0으로 하고 내부에서 조절 */
             box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; 
             width: 320px; margin: 20px auto;
             position: relative;
@@ -18,24 +18,11 @@
         }
 
         .add-btn {
-            position: absolute;
-            top: 15px;
-            right: 18px;
-            text-decoration: none;
-            color: #d3d3d3;
-            font-size: 22px;
-            font-weight: 100;
-            line-height: 1;
-            transition: color 0.2s;
-            z-index: 100; 
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 30px;
-            height: 30px;
-            cursor: pointer;
+            position: absolute; top: 15px; right: 18px; text-decoration: none;
+            color: #d3d3d3; font-size: 22px; font-weight: 100; line-height: 1;
+            transition: color 0.2s; z-index: 100; display: flex;
+            justify-content: center; align-items: center; width: 30px; height: 30px; cursor: pointer;
         }
-        .add-btn:hover { color: #a0a0a0; }
 
         .title-input {
             border: none; background: transparent; font-size: 18px; font-weight: 700; text-align: center;
@@ -52,38 +39,27 @@
             width: 10px !important; height: 10px !important; border: none; cursor: pointer; 
             background: none; border-radius: 50% !important; -webkit-appearance: none; padding: 0; flex-shrink: 0;
         }
-        input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
-        input[type="color"]::-webkit-color-swatch { border: none; border-radius: 50%; }
 
-        .timer-container { display: flex; justify-content: center; gap: 6px; }
+        .timer-container { display: flex; justify-content: center; gap: 6px; padding: 0 20px; } /* 상단 박스 여백 고정 */
         .time-box { 
             color: white; border-radius: 12px; padding: 12px 0;
             width: 60px; height: 50px; display: flex; flex-direction: column; 
             justify-content: center; align-items: center; flex-shrink: 0;
-            transition: background 0.3s;
             background-color: #191919; 
         }
 
-        @keyframes jelly {
-            0% { transform: scale(1, 1); }
-            30% { transform: scale(1.15, 0.85); }
-            50% { transform: scale(0.85, 1.15); }
-            100% { transform: scale(1, 1); }
-        }
-
-        .number { 
-            font-size: 30px; font-weight: 700; line-height: 1; margin-bottom: 4px;
-            display: inline-block;
-            will-change: transform;
-        }
-
-        .pop { animation: jelly 0.2s both; }
+        .number { font-size: 30px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
         .label { font-size: 8px; text-transform: uppercase; opacity: 0.8; font-weight: 600; }
 
+        /* ✨ 하단 가이드 섹션 여백 수정 */
         .guide-section {
-            margin-top: 20px; padding-top: 20px 15px 0; border-top: 1px dashed #eee;
-            text-align: left; font-size: 12px; color: #666;
-            display: block; /* 기본적으로 보이게 설정 */
+            margin-top: 25px; 
+            padding: 20px 25px 0; /* 좌우 여백을 상단 박스 라인에 맞춰 넓힘 */
+            border-top: 1px dashed #eee;
+            text-align: left; 
+            font-size: 12px; 
+            color: #666;
+            display: block;
         }
         
         .hidden { display: none !important; }
@@ -94,30 +70,21 @@
         .guide-section li::before { content: "•"; position: absolute; left: 0; color: #2eaadc; }
 
         .about-link {
-            display: block; 
-            text-align: center; 
-            margin-top: 20px; 
-            margin-bottom: -10px; 
-            font-size: 11px;
-            color: #aaa; 
-            text-decoration: none; 
-            transition: color 0.2s; 
-            font-weight: 600;
+            display: block; text-align: center; margin-top: 20px; margin-bottom: -10px; 
+            font-size: 11px; color: #aaa; text-decoration: none; font-weight: 600;
         }
-        .about-link:hover { color: #2eaadc; text-decoration: underline; }
 
+        /* ✨ 버튼 너비를 가이드 섹션 안쪽 여백에 맞게 100%로 설정 */
         .copy-btn {
             display: block; width: 100%; margin-top: 5px; padding: 12px; font-size: 13px; font-weight: 700;
             background: #2eaadc; color: white; border: none; border-radius: 8px; cursor: pointer;
-            transition: background 0.2s;
         }
-        .copy-btn:hover { background: #258db5; }
         .footer { margin-top: 20px; font-size: 11px; color: #aaa; text-align: center; }
     </style>
 </head>
 <body>
     <div class="card">
-        <a href="https://momdi.github.io/notion-widget/deadline.html" target="_blank" class="add-btn" title="새 위젯 만들기">+</a>
+        <a href="https://momdi.github.io/notion-widget/deadline.html" target="_blank" class="add-btn">+</a>
 
         <input type="text" id="projectTitle" class="title-input" placeholder="제목을 입력하세요">
         <div class="integrated-settings">
@@ -151,7 +118,6 @@
             </div>
         </div>
     </div>
-
     <script>
         const titleInput = document.getElementById('projectTitle');
         const dateInput = document.getElementById('targetDate');
@@ -177,13 +143,9 @@
             const params = new URLSearchParams(window.location.search);
             if (params.get('t')) titleInput.value = decodeURIComponent(params.get('t'));
             if (params.get('d')) dateInput.value = params.get('d');
-            
             const color = params.get('c') ? '#' + params.get('c') : '#191919';
             colorPicker.value = color;
             applyColor(color);
-
-            // ✨ 수정된 로직: 아이프레임(노션 임베드) 안에서만 가이드를 숨깁니다.
-            // 웹 브라우저 주소창으로 직접 보고 있을 때는 데이터가 있어도 가이드를 유지합니다.
             if (window.self !== window.top && (params.get('t') || params.get('d'))) {
                 guideSection.classList.add('hidden');
             }
@@ -218,17 +180,14 @@
             const now = new Date().getTime();
             const target = new Date(dateInput.value).getTime();
             const diff = target - now;
-
             if (diff <= 0) {
                 ["days","hours","minutes","seconds"].forEach(id => document.getElementById(id).innerText = "00");
                 return;
             }
-
             const d = String(Math.floor(diff / 86400000)).padStart(2, '0');
             const h = String(Math.floor((diff % 86400000) / 3600000)).padStart(2, '0');
             const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
             const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
-
             animateValue("days", d);
             animateValue("hours", h);
             animateValue("minutes", m);
@@ -238,7 +197,6 @@
         titleInput.addEventListener('input', updateState);
         dateInput.addEventListener('input', updateState);
         colorPicker.addEventListener('input', updateState);
-
         loadFromURL();
         setInterval(updateTimer, 1000);
         updateTimer();
