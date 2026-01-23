@@ -64,7 +64,7 @@ input[type="color"]::-webkit-color-swatch {
             color: white; border-radius: 12px; padding: 12px 0;
             width: 60px; height: 50px; display: flex; flex-direction: column; 
             justify-content: center; align-items: center; flex-shrink: 0;
-            background-color: #191919; 
+            background-color: #2eaadc; 
         }
 
         .number { font-size: 30px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
@@ -174,7 +174,7 @@ input[type="color"]::-webkit-color-swatch {
             const params = new URLSearchParams(window.location.search);
             if (params.get('t')) titleInput.value = decodeURIComponent(params.get('t'));
             if (params.get('d')) dateInput.value = params.get('d');
-            const color = params.get('c') ? '#' + params.get('c') : '#191919';
+            const color = params.get('c') ? '#' + params.get('c') : '2eaadc';
             colorPicker.value = color;
             applyColor(color);
             if (window.self !== window.top && (params.get('t') || params.get('d'))) {
