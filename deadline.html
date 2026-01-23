@@ -121,7 +121,7 @@ input[type="color"]::-webkit-color-swatch {
         <input type="text" id="projectTitle" class="title-input" placeholder="제목을 입력하세요">
         <div class="integrated-settings">
             <input type="datetime-local" id="targetDate">
-            <input type="color" id="colorPicker" value="#191919"> 
+            <input type="color" id="colorPicker" value="#2eaadc"> 
         </div>
         <div class="timer-container">
             <div class="time-box"><span class="number" id="days">00</span><span class="label">Days</span></div>
@@ -174,7 +174,7 @@ input[type="color"]::-webkit-color-swatch {
             const params = new URLSearchParams(window.location.search);
             if (params.get('t')) titleInput.value = decodeURIComponent(params.get('t'));
             if (params.get('d')) dateInput.value = params.get('d');
-            const color = params.get('c') ? '#' + params.get('c') : '2eaadc';
+            const color = params.get('c') ? '#' + params.get('c') : '#2eaadc';
             colorPicker.value = color;
             applyColor(color);
             if (window.self !== window.top && (params.get('t') || params.get('d'))) {
