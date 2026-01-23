@@ -89,9 +89,22 @@ input[type="color"]::-webkit-color-swatch {
         .guide-section li::before { content: "•"; position: absolute; left: 0; color: #2eaadc; }
 
         .about-link {
-            display: block; text-align: center; margin-top: 20px; margin-bottom: -10px; 
-            font-size: 11px; color: #aaa; text-decoration: none; font-weight: 600;
-        }
+    display: block; 
+    text-align: center; 
+    margin-top: 20px; 
+    margin-bottom: -10px; 
+    font-size: 11px;
+    color: #aaa; /* 기본 색상: 흐린 회색 */
+    text-decoration: none; 
+    transition: color 0.3s ease; /* 색상이 부드럽게 변하도록 애니메이션 추가 */
+    font-weight: 600;
+}
+
+/* ✨ 마우스를 올렸을 때 색상 변경 */
+.about-link:hover { 
+    color: #2eaadc; /* 맘디 시그니처 하늘색으로 변경 */
+    text-decoration: underline; /* 밑줄을 생기게 해서 클릭 가능한 링크임을 강조 */
+}
 
         /* ✨ 버튼 너비를 가이드 섹션 안쪽 여백에 맞게 100%로 설정 */
         .copy-btn {
